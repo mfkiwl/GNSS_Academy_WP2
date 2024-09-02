@@ -1062,7 +1062,7 @@ def readSatPos(SatPosFile):
                 line_splited = Line.split()
 
                 for i in range(1, len(line_splited)+1):
-                    dict[fields[i-1]].append(float(line_splited[i-1]))
+                    dict[fields[i-1]].append(line_splited[i-1])
 
     return dict
 
@@ -1095,7 +1095,7 @@ def readSatApo(SatPosFile):
                 line_splited = Line.split()
 
                 for i in range(1, len(line_splited)+1):
-                    dict[fields[i-1]].append(float(line_splited[i-1]))
+                    dict[fields[i-1]].append(line_splited[i-1])
 
     return dict
 
@@ -1128,7 +1128,7 @@ def readSatClk(SatPosFile):
                 line_splited = Line.split()
 
                 for i in range(1, len(line_splited)+1):
-                    dict[fields[i-1]].append(float(line_splited[i-1]))
+                    dict[fields[i-1]].append(line_splited[i-1])
 
     return dict
 
@@ -1161,7 +1161,7 @@ def readSatBia(SatPosFile):
                 line_splited = Line.split()
 
                 for i in range(1, len(line_splited)+1):
-                    dict[fields[i-1]].append(float(line_splited[i-1]))
+                    dict[fields[i-1]].append(line_splited[i-1])
 
     return dict
 

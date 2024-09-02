@@ -136,10 +136,10 @@ def runCorrectMeas(Year,
             "Elevation": 0.0,       # Elevation
             "Azimuth": 0.0,         # Azimuth
             "Flag": 1,              # 0: Not Used 1: Used
-            "LeoX": 0.0,            # X-Component of the Receiver CoP Position 
+            "LeoX": 0.0,            # X-Component of the Receiver CoP Position --> CoP (Center of Phases)
             "LeoY": 0.0,            # Y-Component of the Receiver CoP Position  
             "LeoZ": 0.0,            # Z-Component of the Receiver CoP Position  
-            "LeoApoX": 0.0,         # X-Component of the Receiver APO in ECEF
+            "LeoApoX": 0.0,         # X-Component of the Receiver APO in ECEF  --> APO (Antenna Phase Offset)
             "LeoApoY": 0.0,         # Y-Component of the Receiver APO in ECEF
             "LeoApoZ": 0.0,         # Z-Component of the Receiver APO in ECEF
             "SatX": 0.0,            # X-Component of the Satellite CoP Position 
