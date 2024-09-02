@@ -32,7 +32,7 @@ from InputOutput import createOutputFile
 from InputOutput import openInputFile
 from InputOutput import readObsEpoch
 from InputOutput import generatePreproFile
-# from InputOutput import readLeoPos
+from InputOutput import readLeoPos
 # from InputOutput import readLeoQuat
 # from InputOutput import readSatPos
 # from InputOutput import readSatApo
@@ -106,7 +106,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatPosFile)
     # Read the file
-    # LeoPosInfo = readLeoPos(SatPosFile)
+    LeoPosInfo = readLeoPos(SatPosFile)
     
     # Define the full path and name to the Sentinel Quaternions file to read and open the file
     SatQuatFile = Scen + \
@@ -264,7 +264,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             Doy,
                                                                             Conf, 
                                                                             PreproObsInfo, 
-                                                                            # LeoPosInfo,
+                                                                            LeoPosInfo,
                                                                             # LeoQuatInfo,
                                                                             # SatPosInfo,
                                                                             # SatApoInfo,
