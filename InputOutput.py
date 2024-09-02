@@ -969,7 +969,7 @@ def openInputFile(Path):
 
 
 
-
+# --------------------------------------------------------------------------------------------------------------------------------
 
 def readLeoPos(SatPosFile):
     first_line = True
@@ -1000,5 +1000,169 @@ def readLeoPos(SatPosFile):
 
     return dict
 
-
 # End of readLeoPos()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readLeoQuat(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                line_splited = Line.replace("#", "").split()
+                number_fields = len(line_splited)
+
+                for i in range(1, number_fields+1):
+                    dict[line_splited[i-1]] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(1, len(line_splited)+1):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return dict
+
+# End of readLeoQuat()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatPos(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                line_splited = Line.replace("#", "").split()
+                number_fields = len(line_splited)
+
+                for i in range(1, number_fields+1):
+                    dict[line_splited[i-1]] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(1, len(line_splited)+1):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return dict
+
+# End of readSatPos()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatApo(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line:
+                first_line = False
+                line_splited = Line.replace("#", "").split()
+                number_fields = len(line_splited)
+
+                for i in range(1, number_fields+1):
+                    dict[line_splited[i-1]] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line:
+                line_splited = Line.split()
+
+                for i in range(1, len(line_splited)+1):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return dict
+
+# End of readSatApo()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatClk(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                line_splited = Line.replace("#", "").split()
+                number_fields = len(line_splited)
+
+                for i in range(1, number_fields+1):
+                    dict[line_splited[i-1]] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(1, len(line_splited)+1):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return dict
+
+# End of readSatClk()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatBia(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line:
+                first_line = False
+                line_splited = Line.replace("#", "").split()
+                number_fields = len(line_splited)
+
+                for i in range(1, number_fields+1):
+                    dict[line_splited[i-1]] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line:
+                line_splited = Line.split()
+
+                for i in range(1, len(line_splited)+1):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return dict
+
+# End of readSatApo()

@@ -33,11 +33,11 @@ from InputOutput import openInputFile
 from InputOutput import readObsEpoch
 from InputOutput import generatePreproFile
 from InputOutput import readLeoPos
-# from InputOutput import readLeoQuat
-# from InputOutput import readSatPos
-# from InputOutput import readSatApo
-# from InputOutput import readSatClk
-# from InputOutput import readSatBia
+from InputOutput import readLeoQuat
+from InputOutput import readSatPos
+from InputOutput import readSatApo
+from InputOutput import readSatClk
+from InputOutput import readSatBia
 from InputOutput import ObsIdxP
 # from InputOutput import generateCorrFile
 from InputOutput import PreproHdr, CorrHdr
@@ -116,7 +116,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatQuatFile)
     # Read the file
-    # LeoQuatInfo = readLeoQuat(SatQuatFile)
+    LeoQuatInfo = readLeoQuat(SatQuatFile)
 
     # Define the full path and name to the SAT_POS file to read and open the file
     SatPosFile = Scen + \
@@ -126,7 +126,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatPosFile)
     # Read the file
-    # SatPosInfo = readSatPos(SatPosFile)
+    SatPosInfo = readSatPos(SatPosFile)
 
     # Define the full path and name to the SAT_APO file to read and open the file
     SatApoFile = Scen + \
@@ -135,7 +135,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatApoFile)
     # Read the file
-    # SatApoInfo = readSatApo(SatApoFile)
+    SatApoInfo = readSatApo(SatApoFile)
 
     # Define the full path and name to the SAT_CLK file to read and open the file
     SatClkFile = Scen + \
@@ -145,7 +145,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatClkFile)
     # Read the file
-    # SatClkInfo = readSatClk(SatClkFile)
+    SatClkInfo = readSatClk(SatClkFile)
 
     # Define the full path and name to the SAT_BIA file to read and open the file
     SatBiaFile = Scen + \
@@ -154,7 +154,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatBiaFile)
     # Read the file
-    # SatBiaInfo = readSatBia(SatBiaFile)
+    SatBiaInfo = readSatBia(SatBiaFile)
 
 
 
@@ -265,11 +265,11 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             Conf, 
                                                                             PreproObsInfo, 
                                                                             LeoPosInfo,
-                                                                            # LeoQuatInfo,
-                                                                            # SatPosInfo,
-                                                                            # SatApoInfo,
-                                                                            # SatClkInfo,
-                                                                            # SatBiaInfo,
+                                                                            LeoQuatInfo,
+                                                                            SatPosInfo,
+                                                                            SatApoInfo,
+                                                                            SatClkInfo,
+                                                                            SatBiaInfo,
                                                                             # SatComPos_1,
                                                                             # Sod_1
                                                                             )
