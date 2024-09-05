@@ -184,11 +184,11 @@ def runCorrectMeas(Year,
 
     if SatPrepro["Status"] == STATUS_OK:
 
-        SatClkBias = computeSatClkBias(Sod, SatClkInfo)     # Compute Satellite Clock Bias (Linear interpolation between closer inputs) 
+        SatClkBias = computeSatClkBias(Sod, SatLabel, SatClkInfo)     # Compute Satellite Clock Bias (Linear interpolation between closer inputs) 
 
         DeltaT = SatPrepro["C1"]/Const.SPEED_OF_LIGHT
 
-        TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
+        # TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
 
     #     RcvrPosXyz = computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo)
 
