@@ -25,6 +25,7 @@ from COMMON.Dates import convertYearMonthDay2JulianDay
 from COMMON import GnssConstants as Const
 from COMMON.Coordinates import llh2xyz
 import numpy as np
+import pandas as pd
 
 # Input interfaces
 #----------------------------------------------------------------------
@@ -984,21 +985,20 @@ def readLeoPos(SatPosFile):
 
             if first_line and '#' in Line:
                 first_line = False
-                line_splited = Line.replace("#", "").split()
+                number_fields = len(Line.split())
 
-                for field in line_splited:
-                    field = field[field.find(":") + 1:]
-                    dict[field] = []
+                for i in range(0, number_fields):
+                    dict[i] = []
 
                 fields = list(dict.keys()) 
 
             elif not first_line and '#' not in Line:
                 line_splited = Line.split()
 
-                for i in range(1, len(line_splited)+1):
+                for i in range(0, number_fields):
                     dict[fields[i-1]].append(float(line_splited[i-1]))
 
-    return dict
+    return pd.DataFrame.from_dict(dict)
 
 # End of readLeoPos()
 
@@ -1017,21 +1017,20 @@ def readLeoQuat(SatPosFile):
 
             if first_line and '#' in Line:
                 first_line = False
-                line_splited = Line.replace("#", "").split()
+                number_fields = len(Line.split())
 
-                for field in line_splited:
-                    field = field[field.find(":") + 1:]
-                    dict[field] = []
+                for i in range(0, number_fields):
+                    dict[i] = []
 
                 fields = list(dict.keys()) 
 
             elif not first_line and '#' not in Line:
                 line_splited = Line.split()
 
-                for i in range(1, len(line_splited)+1):
+                for i in range(0, number_fields):
                     dict[fields[i-1]].append(float(line_splited[i-1]))
 
-    return dict
+    return pd.DataFrame.from_dict(dict)
 
 # End of readLeoQuat()
 
@@ -1050,21 +1049,20 @@ def readSatPos(SatPosFile):
 
             if first_line and '#' in Line:
                 first_line = False
-                line_splited = Line.replace("#", "").split()
+                number_fields = len(Line.split())
 
-                for field in line_splited:
-                    field = field[field.find(":") + 1:]
-                    dict[field] = []
+                for i in range(0, number_fields):
+                    dict[i] = []
 
                 fields = list(dict.keys()) 
 
             elif not first_line and '#' not in Line:
                 line_splited = Line.split()
 
-                for i in range(1, len(line_splited)+1):
+                for i in range(0, number_fields):
                     dict[fields[i-1]].append(line_splited[i-1])
 
-    return dict
+    return pd.DataFrame.from_dict(dict)
 
 # End of readSatPos()
 
@@ -1083,21 +1081,20 @@ def readSatApo(SatPosFile):
 
             if first_line:
                 first_line = False
-                line_splited = Line.replace("#", "").split()
+                number_fields = len(Line.split())
 
-                for field in line_splited:
-                    field = field[field.find(":") + 1:]
-                    dict[field] = []
+                for i in range(0, number_fields):
+                    dict[i] = []
 
                 fields = list(dict.keys()) 
 
             elif not first_line:
                 line_splited = Line.split()
 
-                for i in range(1, len(line_splited)+1):
+                for i in range(0, number_fields):
                     dict[fields[i-1]].append(line_splited[i-1])
 
-    return dict
+    return pd.DataFrame.from_dict(dict)
 
 # End of readSatApo()
 
@@ -1116,21 +1113,20 @@ def readSatClk(SatPosFile):
 
             if first_line and '#' in Line:
                 first_line = False
-                line_splited = Line.replace("#", "").split()
+                number_fields = len(Line.split())
 
-                for field in line_splited:
-                    field = field[field.find(":") + 1:]
-                    dict[field] = []
+                for i in range(0, number_fields):
+                    dict[i] = []
 
                 fields = list(dict.keys()) 
 
             elif not first_line and '#' not in Line:
                 line_splited = Line.split()
 
-                for i in range(1, len(line_splited)+1):
+                for i in range(0, number_fields):
                     dict[fields[i-1]].append(line_splited[i-1])
 
-    return dict
+    return pd.DataFrame.from_dict(dict)
 
 # End of readSatClk()
 
@@ -1149,20 +1145,19 @@ def readSatBia(SatPosFile):
 
             if first_line:
                 first_line = False
-                line_splited = Line.replace("#", "").split()
+                number_fields = len(Line.split())
 
-                for field in line_splited:
-                    field = field[field.find(":") + 1:]
-                    dict[field] = []
+                for i in range(0, number_fields):
+                    dict[i] = []
 
                 fields = list(dict.keys()) 
 
             elif not first_line:
                 line_splited = Line.split()
 
-                for i in range(1, len(line_splited)+1):
+                for i in range(0, number_fields):
                     dict[fields[i-1]].append(line_splited[i-1])
 
-    return dict
+    return pd.DataFrame.from_dict(dict)
 
 # End of readSatApo()

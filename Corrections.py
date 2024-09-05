@@ -30,7 +30,7 @@ from COMMON.Misc import findSun, crossProd
 import numpy as np
 
 
-from Correction_functions import computeLeoComPos
+from Correction_functions import computeLeoComPos, computeSatClkBias, computeRcvrApo
 
 
 
@@ -182,13 +182,13 @@ def runCorrectMeas(Year,
 
     RcvrRefPosXyzCom = computeLeoComPos(Sod, LeoPosInfo)    # Compute the Center of Masses (CoM)
 
-    # if SatPrepro["Status"] == STATUS_OK:
+    if SatPrepro["Status"] == STATUS_OK:
 
-    #     SatClkBias = computeSatClkBias(Sod, SatClkInfo)     # Compute Satellite Clock Bias (Linear interpolation between closer inputs) 
+        SatClkBias = computeSatClkBias(Sod, SatClkInfo)     # Compute Satellite Clock Bias (Linear interpolation between closer inputs) 
 
-    #     DeltaT = SatPrepro["C1"]/Const.SPEED_OF_LIGHT
+        DeltaT = SatPrepro["C1"]/Const.SPEED_OF_LIGHT
 
-    #     TransmissionTime = Sod - DeltaT -SatClkBias         # Compute Transmission Time
+        TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
 
     #     RcvrPosXyz = computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo)
 
