@@ -72,10 +72,14 @@ def computeSatClkBias(Sod, SatLabel, SatClkInfo):
             close_value_up = SatClkInfo[SatClkInfo[SatClkIdx["SOD"]] > Sod][:1]        # Getting the first element for cases higher than Sod
             close_value_up = close_value_up.values
 
+            # The idea is to compute first the differences to get the pendent of the line, but doing this we will love the offset
+            # Then, we have to add this offset as a sum
+
             clock_bias = (\
-                (close_value_up[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0] - close_value_down[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0])  \
-                            /(close_value_up[:, SatClkIdx["SOD"]][0] - close_value_down[:, SatClkIdx["SOD"]][0]) \
-                        ) * Sod
+                            (close_value_up[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0] - close_value_down[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0])/  \
+                            (close_value_up[:, SatClkIdx["SOD"]][0] - close_value_down[:, SatClkIdx["SOD"]][0]) \
+                        ) * Sod \
+                + close_value_down[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0]      # Adding the offset removed by the last expression
     except:
         pass
 
