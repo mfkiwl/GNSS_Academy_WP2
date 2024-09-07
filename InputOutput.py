@@ -1161,3 +1161,54 @@ def readSatBia(SatPosFile):
     return pd.DataFrame.from_dict(dict)
 
 # End of readSatApo()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def generateCorrFile(fcorr, CorrInfo):
+    for SatPreproObs in CorrInfo.items():
+        # Prepare outputs
+        Outputs = OrderedDict({})
+        Outputs["SOD"] = SatPreproObs["Sod"]
+        Outputs["DOY"] = SatPreproObs["Doy"]
+        # Outputs["CONST"] = SatPreproObs["CONST"]
+        # Outputs["PRN"] = SatPreproObs["PRN"]
+        Outputs["ELEV"] = SatPreproObs["Elevation"]
+        Outputs["AZIM"] = SatPreproObs["Azimuth"]
+        Outputs["FLAG"] = SatPreproObs["Flag"]
+
+        Outputs["LEO-X"] = SatPreproObs["LeoX"]
+        Outputs["LEO-Y"] = SatPreproObs["LeoY"]
+        Outputs["LEO-Z"] = SatPreproObs["LeoZ"]
+
+        Outputs["LEO-APO-X"] = SatPreproObs["LeoApoX"]
+        Outputs["LEO-APO-Y"] = SatPreproObs["LeoApoY"]
+        Outputs["LEO-APO-Z"] = SatPreproObs["LeoApoZ"]
+
+        Outputs["SAT-X"] = SatPreproObs["SatX"]
+        Outputs["SAT-Y"] = SatPreproObs["SatY"]
+        Outputs["SAT-Z"] = SatPreproObs["SatZ"]
+
+        Outputs["SAT-APO-X"] = SatPreproObs["SatApoX"]
+        Outputs["SAT-APO-Y"] = SatPreproObs["SatApoY"]
+        Outputs["SAT-APO-Z"] = SatPreproObs["SatApoZ"]
+
+        Outputs["SAT-CLK"] = SatPreproObs["SatClk"]
+        Outputs["SAT-CODE-BIA"] = SatPreproObs["SatCodeBia"]
+        Outputs["SAT-PHASE-BIA"] = SatPreproObs["SatPhaseBia"]
+        Outputs["FLIGHT-TIME"] = SatPreproObs["FlightTime"]
+        Outputs["DTR"] = SatPreproObs["Dtr"]
+        Outputs["CORR-CODE"] = SatPreproObs["CorrCode"]
+        Outputs["CORR-PHASE"] = SatPreproObs["CorrPhase"]
+        Outputs["GEOM-RANGE"] = SatPreproObs["GeomRange"]
+
+        Outputs["CODE-RES"] = SatPreproObs["CodeResidual"]
+        Outputs["PHASE-RES"] = SatPreproObs["PhaseResidual"]
+        Outputs["RCVR-CLK"] = SatPreproObs["RcvrClk"]
+
+        # Write line
+        for i, result in enumerate(Outputs):
+            fcorr.write(((PreproFmt[i] + " ") % Outputs[result]))
+
+        fcorr.write("\n")
+
+# End of generatePreproFile
