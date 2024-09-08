@@ -178,54 +178,65 @@ def runCorrectMeas(Year,
 
     # ----------------------------------------------------------------------------------------------------------------------------
 
-    Sod = SatPrepro["Sod"]
+        Sod = SatPrepro["Sod"]
 
-    RcvrRefPosXyzCom = computeLeoComPos(Sod, LeoPosInfo)    # Compute the Center of Masses (CoM)
+        RcvrRefPosXyzCom = computeLeoComPos(Sod, LeoPosInfo)    # Compute the Center of Masses (CoM)
 
-    if SatPrepro["Status"] == STATUS_OK:
+        if SatPrepro["Status"] == STATUS_OK:
 
-        SatClkBias = computeSatClkBias(Sod, SatLabel, SatClkInfo)     # Compute Satellite Clock Bias (Linear interpolation between closer inputs) 
+            SatClkBias = computeSatClkBias(Sod, SatLabel, SatClkInfo)     # Compute Satellite Clock Bias (Linear interpolation between closer inputs) 
 
-        DeltaT = SatPrepro["C1"]/Const.SPEED_OF_LIGHT
+            DeltaT = SatPrepro["C1"]/Const.SPEED_OF_LIGHT
 
-        # TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
+        #     TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
 
-    #     RcvrPosXyz = computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo)
-
-
-
-    #     RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
-
-    #     SatComPos = computeSatComPos(TransmissionTime, SatPosInfo)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
-
-    #     FlightTime = norm(SatComPos - RcvrPos)/Const.SPEED_OF_LIGHT     # Compute Flight Time
-
-    #     SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
-
-    #     Apo = computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
-
-    #     SatCopPos = SatComPos + Apo         # Apply APOs to the Satellite Position
-
-    #     SatelliteBiases = getSatBias(GammaF1F2, SatLabel, SatBiaInfo)   #Get SAtellite Biases in meters
-
-    #     Dtr = computeDtr(SatComPos_1, SatComPos, Sod, Sod_1)            # Compute relativistic correction
-
-    #     SatClkBias += Dtr                   # Apply Dtr to Clock Bias
-
-    #     SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
+        #     RcvrPosXyz = computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo)
 
 
-    #     CorrCode = SatPrepro["IF_C"] + SatClk + CodeSatBias         # Corrected measurements from previous information
-    #     CorrPhase = SatPrepro["IF_P"] + SatClk + PhaseSatBias       # In the statement is miswritten (IF_L)
 
-    #     GeomRange = computeGeoRange(SatCopPos, RcvrPos)             # COmpute Geometrical Range
+        #     RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
 
-    #     CodeResidual = CorrCode - GeomRange                         # Comute the first Residual removing the geometrical range (They include Recevier Clock Estimation)
-    #     PhaseResidual = CorrPhase - GeomRange
+        #     SatComPos = computeSatComPos(TransmissionTime, SatPosInfo)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
 
-    # RcvrClk = estimateRcvrClk(CodeResidual, SigmaUERE)      # Estimate the Receiver Clock first guess as a weighted average of the residuals  
+        #     FlightTime = norm(SatComPos - RcvrPos)/Const.SPEED_OF_LIGHT     # Compute Flight Time
 
-    # CodeResidual -= RcvrClk     # Remove Receiver Clock from residuals
-    # PhaseResidual -= RcvrClk
+        #     SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
+
+        #     Apo = computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
+
+        #     SatCopPos = SatComPos + Apo         # Apply APOs to the Satellite Position
+
+        #     SatelliteBiases = getSatBias(GammaF1F2, SatLabel, SatBiaInfo)   #Get SAtellite Biases in meters
+
+        #     Dtr = computeDtr(SatComPos_1, SatComPos, Sod, Sod_1)            # Compute relativistic correction
+
+        #     SatClkBias += Dtr                   # Apply Dtr to Clock Bias
+
+        #     SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
+
+
+        #     CorrCode = SatPrepro["IF_C"] + SatClk + CodeSatBias         # Corrected measurements from previous information
+        #     CorrPhase = SatPrepro["IF_P"] + SatClk + PhaseSatBias       # In the statement is miswritten (IF_L)
+
+        #     GeomRange = computeGeoRange(SatCopPos, RcvrPos)             # COmpute Geometrical Range
+
+        #     CodeResidual = CorrCode - GeomRange                         # Comute the first Residual removing the geometrical range (They include Recevier Clock Estimation)
+        #     PhaseResidual = CorrPhase - GeomRange
+
+        # RcvrClk = estimateRcvrClk(CodeResidual, SigmaUERE)      # Estimate the Receiver Clock first guess as a weighted average of the residuals  
+
+        # CodeResidual -= RcvrClk     # Remove Receiver Clock from residuals
+        # PhaseResidual -= RcvrClk
+
+        else:
+            SatCorrInfo["Status"] = 0
+
+        # Assigning values
+        SatCorrInfo["Sod"] = Sod
+        SatCorrInfo["Elevation"] = SatPrepro["Elevation"]
+        SatCorrInfo["Azimuth"] = SatPrepro["Azimuth"]
+
+
+        CorrInfo[SatLabel] = SatCorrInfo
 
     return CorrInfo, RcvrRefPosXyz, RcvrRefPosLlh

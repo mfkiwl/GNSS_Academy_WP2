@@ -1,6 +1,9 @@
 from InputOutput import LeoPosIdx, LeoQuatIdx, SatPosIdx, SatApoIdx, SatClkIdx, SatBiaIdx
 import numpy as np
 
+from COMMON.Misc import modulo
+from COMMON.Dates import convertYearDoy2JulianDay
+
 def computeLeoComPos(Sod, LeoPosInfo):
 
     xPos = yPos = zPos = None
@@ -26,11 +29,12 @@ def computeLeoComPos(Sod, LeoPosInfo):
     #     pass
 
     try:
-        LeoPosInfo = LeoPosInfo[LeoPosInfo[LeoPosIdx["SOD"]] == Sod]
+        LeoPosInfo = LeoPosInfo.to_numpy()
+        value_position = np.where(LeoPosInfo[:,LeoPosIdx["SOD"]] == Sod)[0][0]
 
-        xPos = float(LeoPosInfo[LeoPosIdx["xCM"]].unique())
-        yPos = float(LeoPosInfo[LeoPosIdx["yCM"]].unique())
-        zPos = float(LeoPosInfo[LeoPosIdx["zCM"]].unique())
+        xPos = LeoPosInfo[value_position:, LeoPosIdx["xCM"]][0]
+        yPos = LeoPosInfo[value_position:, LeoPosIdx["yCM"]][0]
+        zPos = LeoPosInfo[value_position:, LeoPosIdx["zCM"]][0]
     except:
         pass
 
@@ -87,4 +91,64 @@ def computeSatClkBias(Sod, SatLabel, SatClkInfo):
 
 
 def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
+    
+    # First, filter by satellite
+    LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["SOD"]] == Sod]
+    # LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["CONST"]] == SatLabel[:1]]
+    # LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["PRN"]] == SatLabel[1:]]
+
+    # Converting SOD from object to int
+    q0 = LeoQuatInfo[LeoQuatIdx["q0"]].iloc[0]
+    q1 = LeoQuatInfo[LeoQuatIdx["q1"]].iloc[0]
+    q2 = LeoQuatInfo[LeoQuatIdx["q2"]].iloc[0]
+    q3 = LeoQuatInfo[LeoQuatIdx["q3"]].iloc[0]
+
+    residual = np.array([[  (1 - 2*q2**2 - 2*q3**2),  2*(q1*q2 - q0*q3),         2*(q0*q2 + q1*q3)],     \
+                        [   2*(q1*q2 + q0*q3),        (1 - 2*q1**2 - 2*q3**2),   2*(q2*q3 - q0*q1)],     \
+                        [   2*(q1*q3 - q0*q2),        2*(q0*q1 + q2*q3),         (1 - 2*q1**2 - 2*q2**2)]  \
+                        ])
+
+    JDN = convertYearDoy2JulianDay(Year, Doy, Sod) - 2415020
+
+    fday = None         # fday is Fractional part of the day
+
+    gstr = modulo(279.690983 + 0.9856473354*JDN + 360*fday + 180.360)
+
+
+    # STILL IN PROCESS
+
+
+
+def computeSatComPos(TransmissionTime, SatPosInfo):
+    pass
+
+
+def applySagnac(SatComPos, FlightTime):
+    pass
+
+
+
+def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
+    pass
+
+
+def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
+    pass
+
+
+
+def computeDtr(SatComPos_1, SatComPos, Sod, Sod_1):
+    pass
+
+
+def getUERE(Conf, SatLabel):
+    pass
+
+
+def computeGeoRange(SatCopPos, RcvrPos):
+    pass
+
+
+
+def estimateRcvrClk(CodeResidual, SigmaUERE):
     pass
