@@ -25,6 +25,7 @@ from COMMON.Dates import convertYearMonthDay2JulianDay
 from COMMON import GnssConstants as Const
 from COMMON.Coordinates import llh2xyz
 import numpy as np
+import pandas as pd
 
 # Input interfaces
 #----------------------------------------------------------------------
@@ -190,10 +191,10 @@ CorrHdr = "\
 #SOD C PRN   ELEV    AZIM     FLAG  LEO-X         LEO-Y           LEO-Z  LEO-APO-X LEO-APO-Y LEO-APO-Z  SAT-X         SAT-Y           SAT-Z  SAT-APO-X SAT-APO-Y SAT-APO-Z         SAT-CLK CODE-BIA PHASE-BIA     TOF          DTR       CORR-CODE     CORR-PHASE       GEOM-RNGE   CODE-RES  PHASE-RES       RCVR-CLK       SUERE   \n"
 
 # Line format
-CorrFmt = "%05d %1s %02d %8.3f %8.3f %4d %14.3f %14.3f %14.3f %8.3f %8.3f %8.3f \
-%14.3f %14.3f %14.3f %8.3f %8.3f %8.3f %14.3f %8.3f %8.3f %8.3f %14.3f \
-%14.3f %14.3f %14.3f %10.4f %10.4f %14.3f \
-%10.4f".split()
+CorrFmt = "%05d %1s %02d %8.3f %8.3f %4d %14.3f %14.3f %14.3f %8.3f %8.3f %8.3f " \
+"%14.3f %14.3f %14.3f %8.3f %8.3f %8.3f %14.3f %8.3f %8.3f %8.3f %14.3f " \
+"%14.3f %14.3f %14.3f %10.4f %10.4f %14.3f " \
+"%10.4f".split()
 
 # File columns
 CorrIdx = OrderedDict({})
@@ -967,3 +968,250 @@ def openInputFile(Path):
 
 # End of openInputFile()
 
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+
+def readLeoPos(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                number_fields = len(Line.split())
+
+                for i in range(0, number_fields):
+                    dict[i] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(0, number_fields):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return pd.DataFrame.from_dict(dict)
+
+# End of readLeoPos()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readLeoQuat(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                number_fields = len(Line.split())
+
+                for i in range(0, number_fields):
+                    dict[i] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(0, number_fields):
+                    dict[fields[i-1]].append(float(line_splited[i-1]))
+
+    return pd.DataFrame.from_dict(dict)
+
+# End of readLeoQuat()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatPos(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                number_fields = len(Line.split())
+
+                for i in range(0, number_fields):
+                    dict[i] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(0, number_fields):
+                    dict[fields[i-1]].append(line_splited[i-1])
+
+    return pd.DataFrame.from_dict(dict)
+
+# End of readSatPos()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatApo(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line:
+                first_line = False
+                number_fields = len(Line.split())
+
+                for i in range(0, number_fields):
+                    dict[i] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line:
+                line_splited = Line.split()
+
+                for i in range(0, number_fields):
+                    dict[fields[i-1]].append(line_splited[i-1])
+
+    return pd.DataFrame.from_dict(dict)
+
+# End of readSatApo()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatClk(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line and '#' in Line:
+                first_line = False
+                number_fields = len(Line.split())
+
+                for i in range(0, number_fields):
+                    dict[i] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line and '#' not in Line:
+                line_splited = Line.split()
+
+                for i in range(0, number_fields):
+                    dict[fields[i-1]].append(line_splited[i-1])
+
+    return pd.DataFrame.from_dict(dict)
+
+# End of readSatClk()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def readSatBia(SatPosFile):
+    first_line = True
+
+    fields = []
+    dict = {}
+
+    with open(SatPosFile, 'r') as f:
+        Lines = f.readlines()
+
+        for Line in Lines:
+
+            if first_line:
+                first_line = False
+                number_fields = len(Line.split())
+
+                for i in range(0, number_fields):
+                    dict[i] = []
+
+                fields = list(dict.keys()) 
+
+            elif not first_line:
+                line_splited = Line.split()
+
+                for i in range(0, number_fields):
+                    dict[fields[i-1]].append(line_splited[i-1])
+
+    return pd.DataFrame.from_dict(dict)
+
+# End of readSatApo()
+
+
+# --------------------------------------------------------------------------------------------------------------------------------
+def generateCorrFile(fcorr, CorrInfo):
+    for SatLabel, SatCorrInfo in CorrInfo.items():
+        # Prepare outputs
+        Outputs = OrderedDict({})
+        Outputs["SOD"] = SatCorrInfo["Sod"]
+        # Outputs["DOY"] = SatCorrInfo["Doy"]
+        Outputs["CONST"] = SatLabel[:1]
+        Outputs["PRN"] = int(SatLabel[1:])
+        Outputs["ELEV"] = SatCorrInfo["Elevation"]
+        Outputs["AZIM"] = SatCorrInfo["Azimuth"]
+        Outputs["FLAG"] = SatCorrInfo["Flag"]
+
+        Outputs["LEO-X"] = SatCorrInfo["LeoX"]
+        Outputs["LEO-Y"] = SatCorrInfo["LeoY"]
+        Outputs["LEO-Z"] = SatCorrInfo["LeoZ"]
+
+        Outputs["LEO-APO-X"] = SatCorrInfo["LeoApoX"]
+        Outputs["LEO-APO-Y"] = SatCorrInfo["LeoApoY"]
+        Outputs["LEO-APO-Z"] = SatCorrInfo["LeoApoZ"]
+
+        Outputs["SAT-X"] = SatCorrInfo["SatX"]
+        Outputs["SAT-Y"] = SatCorrInfo["SatY"]
+        Outputs["SAT-Z"] = SatCorrInfo["SatZ"]
+
+        Outputs["SAT-APO-X"] = SatCorrInfo["SatApoX"]
+        Outputs["SAT-APO-Y"] = SatCorrInfo["SatApoY"]
+        Outputs["SAT-APO-Z"] = SatCorrInfo["SatApoZ"]
+
+        Outputs["SAT-CLK"] = SatCorrInfo["SatClk"]
+        Outputs["SAT-CODE-BIA"] = SatCorrInfo["SatCodeBia"]
+        Outputs["SAT-PHASE-BIA"] = SatCorrInfo["SatPhaseBia"]
+
+        Outputs["TOF"] = SatCorrInfo["FlightTime"]      # TOF stands for Time of Flight
+        Outputs["DTR"] = SatCorrInfo["Dtr"]
+        Outputs["CORR-CODE"] = SatCorrInfo["CorrCode"]
+        Outputs["CORR-PHASE"] = SatCorrInfo["CorrPhase"]
+        Outputs["GEOM-RNGE"] = SatCorrInfo["GeomRange"]
+
+        Outputs["CODE-RES"] = SatCorrInfo["CodeResidual"]
+        Outputs["PHASE-RES"] = SatCorrInfo["PhaseResidual"]
+        Outputs["RCVR-CLK"] = SatCorrInfo["RcvrClk"]
+
+        Outputs["SUERE"] =SatCorrInfo["SigmaUere"]
+
+        # Write line
+        for i, result in enumerate(Outputs):
+            fcorr.write(((CorrFmt[i] + " ") % Outputs[result]))
+
+        fcorr.write("\n")
+
+# End of generatePreproFile

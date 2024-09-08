@@ -32,14 +32,14 @@ from InputOutput import createOutputFile
 from InputOutput import openInputFile
 from InputOutput import readObsEpoch
 from InputOutput import generatePreproFile
-# from InputOutput import readLeoPos
-# from InputOutput import readLeoQuat
-# from InputOutput import readSatPos
-# from InputOutput import readSatApo
-# from InputOutput import readSatClk
-# from InputOutput import readSatBia
+from InputOutput import readLeoPos
+from InputOutput import readLeoQuat
+from InputOutput import readSatPos
+from InputOutput import readSatApo
+from InputOutput import readSatClk
+from InputOutput import readSatBia
 from InputOutput import ObsIdxP
-# from InputOutput import generateCorrFile
+from InputOutput import generateCorrFile
 from InputOutput import PreproHdr, CorrHdr
 from InputOutput import CSNEPOCHS, CSNPOINTS
 from Preprocessing import runPreprocessing
@@ -106,7 +106,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatPosFile)
     # Read the file
-    # LeoPosInfo = readLeoPos(SatPosFile)
+    LeoPosInfo = readLeoPos(SatPosFile)
     
     # Define the full path and name to the Sentinel Quaternions file to read and open the file
     SatQuatFile = Scen + \
@@ -116,7 +116,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatQuatFile)
     # Read the file
-    # LeoQuatInfo = readLeoQuat(SatQuatFile)
+    LeoQuatInfo = readLeoQuat(SatQuatFile)
 
     # Define the full path and name to the SAT_POS file to read and open the file
     SatPosFile = Scen + \
@@ -126,7 +126,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatPosFile)
     # Read the file
-    # SatPosInfo = readSatPos(SatPosFile)
+    SatPosInfo = readSatPos(SatPosFile)
 
     # Define the full path and name to the SAT_APO file to read and open the file
     SatApoFile = Scen + \
@@ -135,7 +135,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatApoFile)
     # Read the file
-    # SatApoInfo = readSatApo(SatApoFile)
+    SatApoInfo = readSatApo(SatApoFile)
 
     # Define the full path and name to the SAT_CLK file to read and open the file
     SatClkFile = Scen + \
@@ -145,7 +145,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatClkFile)
     # Read the file
-    # SatClkInfo = readSatClk(SatClkFile)
+    SatClkInfo = readSatClk(SatClkFile)
 
     # Define the full path and name to the SAT_BIA file to read and open the file
     SatBiaFile = Scen + \
@@ -154,7 +154,7 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     print("INFO: Reading file: %s..." %
     SatBiaFile)
     # Read the file
-    # SatBiaInfo = readSatBia(SatBiaFile)
+    SatBiaInfo = readSatBia(SatBiaFile)
 
 
 
@@ -185,9 +185,15 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
         fpreprobs = createOutputFile(PreproObsFile, PreproHdr)
 
     # If Corrected outputs are activated
-    # if Conf["CORR_OUT"] == 1:
+    if Conf["CORR_OUT"] == 1:
         # Define the full path and name to the output CORR file
-        
+        PreproObsFile = Scen + \
+            '/OUT/CORR/' + "CORR_%s_Y%02dD%03d.dat" % \
+                (Conf['SAT_ACRONYM'], Year % 100, Doy)
+
+        # Create output file
+        fcorr = createOutputFile(PreproObsFile, CorrHdr)
+
     # Initialize Variables
     EndOfFile = False
     ObsInfo = [None]
@@ -264,20 +270,20 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             Doy,
                                                                             Conf, 
                                                                             PreproObsInfo, 
-                                                                            # LeoPosInfo,
-                                                                            # LeoQuatInfo,
-                                                                            # SatPosInfo,
-                                                                            # SatApoInfo,
-                                                                            # SatClkInfo,
-                                                                            # SatBiaInfo,
+                                                                            LeoPosInfo,
+                                                                            LeoQuatInfo,
+                                                                            SatPosInfo,
+                                                                            SatApoInfo,
+                                                                            SatClkInfo,
+                                                                            SatBiaInfo,
                                                                             # SatComPos_1,
                                                                             # Sod_1
                                                                             )
 
                     # If CORR outputs are requested
-                    # if Conf["CORR_OUT"] == 1:
+                    if Conf["CORR_OUT"] == 1:
                         # Generate output file
-                        # generateCorrFile(fcorr, CorrInfo)
+                        generateCorrFile(fcorr, CorrInfo)
 
     # If PREPRO outputs are requested
     if Conf["PREPRO_OUT"] == 1:
@@ -292,8 +298,9 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
         # generatePreproPlots(PreproObsFile)
 
     # If CORR outputs are requested
-    # if Conf["CORR_OUT"] == 1:
+    if Conf["CORR_OUT"] == 1:
         # Close CORR output file
+        fcorr.close()
 
 # End of JD loop
 
