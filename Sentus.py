@@ -39,7 +39,7 @@ from InputOutput import readSatApo
 from InputOutput import readSatClk
 from InputOutput import readSatBia
 from InputOutput import ObsIdxP
-# from InputOutput import generateCorrFile
+from InputOutput import generateCorrFile
 from InputOutput import PreproHdr, CorrHdr
 from InputOutput import CSNEPOCHS, CSNPOINTS
 from Preprocessing import runPreprocessing
@@ -185,9 +185,15 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
         fpreprobs = createOutputFile(PreproObsFile, PreproHdr)
 
     # If Corrected outputs are activated
-    # if Conf["CORR_OUT"] == 1:
+    if Conf["CORR_OUT"] == 1:
         # Define the full path and name to the output CORR file
-        
+        PreproObsFile = Scen + \
+            '/OUT/CORR/' + "CORR_%s_Y%02dD%03d.dat" % \
+                (Conf['SAT_ACRONYM'], Year % 100, Doy)
+
+        # Create output file
+        fcorr = createOutputFile(PreproObsFile, CorrHdr)
+
     # Initialize Variables
     EndOfFile = False
     ObsInfo = [None]
@@ -275,9 +281,9 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             )
 
                     # If CORR outputs are requested
-                    # if Conf["CORR_OUT"] == 1:
+                    if Conf["CORR_OUT"] == 1:
                         # Generate output file
-                        # generateCorrFile(fcorr, CorrInfo)
+                        generateCorrFile(fcorr, CorrInfo)
 
     # If PREPRO outputs are requested
     if Conf["PREPRO_OUT"] == 1:
@@ -292,8 +298,9 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
         # generatePreproPlots(PreproObsFile)
 
     # If CORR outputs are requested
-    # if Conf["CORR_OUT"] == 1:
+    if Conf["CORR_OUT"] == 1:
         # Close CORR output file
+        fcorr.close()
 
 # End of JD loop
 
