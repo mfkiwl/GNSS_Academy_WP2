@@ -1,6 +1,7 @@
 from InputOutput import LeoPosIdx, LeoQuatIdx, SatPosIdx, SatApoIdx, SatClkIdx, SatBiaIdx
 import numpy as np
 
+from COMMON import GnssConstants as Const
 from COMMON.Misc import modulo
 from COMMON.Dates import convertYearDoy2JulianDay
 
@@ -92,10 +93,18 @@ def computeSatClkBias(Sod, SatLabel, SatClkInfo):
 
 def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     
-    # First, filter by satellite
+    # Acquiring Center of Masses, Antenna Reference Frame and Phase Center Offset
+    COM = Conf['LEO_COM_POS']
+    ARP = Conf['LEO_ARP_POS']
+
+    if SatLabel[0] == 'G':
+        PCO = Conf['LEO_PCO_GPS']
+    elif SatLabel[0] == 'E':
+        PCO = Conf['LEO_PCO_GAL']
+
+    APC = ARP - PCO     # Acquiring Antenna Phase Center (APC), as PCO is the difference between ARP and APC
+
     LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["SOD"]] == Sod]
-    # LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["CONST"]] == SatLabel[:1]]
-    # LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["PRN"]] == SatLabel[1:]]
 
     # Converting SOD from object to int
     q0 = LeoQuatInfo[LeoQuatIdx["q0"]].iloc[0]
@@ -103,19 +112,20 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     q2 = LeoQuatInfo[LeoQuatIdx["q2"]].iloc[0]
     q3 = LeoQuatInfo[LeoQuatIdx["q3"]].iloc[0]
 
-    residual = np.array([[  (1 - 2*q2**2 - 2*q3**2),  2*(q1*q2 - q0*q3),         2*(q0*q2 + q1*q3)],     \
-                        [   2*(q1*q2 + q0*q3),        (1 - 2*q1**2 - 2*q3**2),   2*(q2*q3 - q0*q1)],     \
-                        [   2*(q1*q3 - q0*q2),        2*(q0*q1 + q2*q3),         (1 - 2*q1**2 - 2*q2**2)]  \
-                        ])
+    # Creating Rotation Matrix for later computation
+    rotation_matrix = np.array([[  (1 - 2*q2**2 - 2*q3**2),  2*(q1*q2 - q0*q3),         2*(q0*q2 + q1*q3)],
+                                [   2*(q1*q2 + q0*q3),       (1 - 2*q1**2 - 2*q3**2),   2*(q2*q3 - q0*q1)],
+                                [   2*(q1*q3 - q0*q2),       2*(q0*q1 + q2*q3),         (1 - 2*q1**2 - 2*q2**2)]
+                                ])
 
-    JDN = convertYearDoy2JulianDay(Year, Doy, Sod) - 2415020
+    # Acquiring Greenwich Siderial Time Reference, but need to obtain Jualian Day Number and fraction of the day first
+    JDN = convertYearDoy2JulianDay(Year, Doy, Sod) - 2415020    # Julian Day Number
+    fday = Sod / Const.S_IN_D                                   # fday is Fractional part of the day
 
-    fday = None         # fday is Fractional part of the day
-
-    gstr = modulo(279.690983 + 0.9856473354*JDN + 360*fday + 180.360)
+    gstr = modulo(279.690983 + 0.9856473354*JDN + 360*fday + 180, 360)
 
 
-    # STILL IN PROCESS
+    # STILL IN PROCESS ( How to compute ECI to ECEF and acquire XYZ Position ???? )
 
 
 
@@ -124,8 +134,15 @@ def computeSatComPos(TransmissionTime, SatPosInfo):
 
 
 def applySagnac(SatComPos, FlightTime):
-    pass
 
+    angle = Const.OMEGA_EARTH * FlightTime
+    rot_matrix = np.array( [[np.cos(angle),    np.sin(angle),   0],
+                            [-np.sin(angle),   np.cos(angle),   0],
+                            [0,                0,               1]])
+
+    sagnac = np.cross(rot_matrix, SatComPos)
+
+    return sagnac
 
 
 def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
