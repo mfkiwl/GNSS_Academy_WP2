@@ -1169,7 +1169,6 @@ def generateCorrFile(fcorr, CorrInfo):
         # Prepare outputs
         Outputs = OrderedDict({})
         Outputs["SOD"] = SatCorrInfo["Sod"]
-        # Outputs["DOY"] = SatCorrInfo["Doy"]
         Outputs["CONST"] = SatLabel[:1]
         Outputs["PRN"] = int(SatLabel[1:])
         Outputs["ELEV"] = SatCorrInfo["Elevation"]

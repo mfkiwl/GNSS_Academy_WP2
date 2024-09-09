@@ -30,7 +30,7 @@ from COMMON.Misc import findSun, crossProd
 import numpy as np
 
 
-from Correction_functions import computeLeoComPos, computeSatClkBias, computeRcvrApo
+from Correction_functions import computeLeoComPos, computeSatClkBias, computeRcvrApo, getUERE
 
 
 
@@ -188,7 +188,7 @@ def runCorrectMeas(Year,
 
             DeltaT = SatPrepro["C1"]/Const.SPEED_OF_LIGHT
 
-        #     TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
+            TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
 
         #     RcvrPosXyz = computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo)
 
@@ -212,7 +212,7 @@ def runCorrectMeas(Year,
 
         #     SatClkBias += Dtr                   # Apply Dtr to Clock Bias
 
-        #     SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
+            SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
 
 
         #     CorrCode = SatPrepro["IF_C"] + SatClk + CodeSatBias         # Corrected measurements from previous information
@@ -235,6 +235,11 @@ def runCorrectMeas(Year,
         SatCorrInfo["Sod"] = Sod
         SatCorrInfo["Elevation"] = SatPrepro["Elevation"]
         SatCorrInfo["Azimuth"] = SatPrepro["Azimuth"]
+
+        try:
+            SatCorrInfo["SigmaUere"] = SigmaUERE
+        except:
+            pass
 
 
         CorrInfo[SatLabel] = SatCorrInfo

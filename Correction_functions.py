@@ -43,7 +43,7 @@ def computeLeoComPos(Sod, LeoPosInfo):
 
 def computeSatClkBias(Sod, SatLabel, SatClkInfo):
     # Things to discuss, there are acases where the Sod is 20 but this clk uses jump of 30 seconds
-    clock_bias = None
+    clock_bias = 0
     close_value_down = close_value_up = 0   # In case of not having any Sod similar, interpolate between the closest values
 
     # Setting decimal precision for flaots
@@ -142,8 +142,15 @@ def computeDtr(SatComPos_1, SatComPos, Sod, Sod_1):
 
 
 def getUERE(Conf, SatLabel):
-    pass
+    sigmaUERE = 0
 
+    if SatLabel[0] == 'G':
+        sigmaUERE = Conf['GPS_UERE']
+
+    elif SatLabel[0] == 'E':
+        sigmaUERE = Conf['GAL_UERE']
+
+    return sigmaUERE
 
 def computeGeoRange(SatCopPos, RcvrPos):
     pass
