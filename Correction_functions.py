@@ -84,7 +84,7 @@ def computeSatClkBias(Sod, SatLabel, SatClkInfo):
                             (close_value_up[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0] - close_value_down[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0])/  \
                             (close_value_up[:, SatClkIdx["SOD"]][0] - close_value_down[:, SatClkIdx["SOD"]][0]) \
                         ) * Sod \
-                + close_value_down[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0]      # Adding the offset removed by the last expression
+                        + close_value_down[:, SatClkIdx["CLK-BIAS"]].astype(np.float64)[0]      # Adding the offset removed by the last expression
     except:
         pass
 
@@ -101,7 +101,7 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
         PCO = Conf['LEO_PCO_GPS']
     elif SatLabel[0] == 'E':
         PCO = Conf['LEO_PCO_GAL']
-
+    # COM -> ARP -> APC
     APC = ARP - PCO     # Acquiring Antenna Phase Center (APC), as PCO is the difference between ARP and APC
 
     LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["SOD"]] == Sod]
@@ -122,8 +122,8 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     JDN = convertYearDoy2JulianDay(Year, Doy, Sod) - 2415020    # Julian Day Number
     fday = Sod / Const.S_IN_D                                   # fday is Fractional part of the day
 
-    gstr = modulo(279.690983 + 0.9856473354*JDN + 360*fday + 180, 360)
-
+    gstr = modulo(279.690983 + 0.9856473354*JDN + 360*fday + 180, 360)      # Convert o radians and rotate it over the third axis (Applying Earth Rotation)
+    gstr = np.deg2rad(gstr)     # Corvert it from degree to radian
 
     # STILL IN PROCESS ( How to compute ECI to ECEF and acquire XYZ Position ???? )
 
@@ -140,7 +140,7 @@ def applySagnac(SatComPos, FlightTime):
                             [-np.sin(angle),   np.cos(angle),   0],
                             [0,                0,               1]])
 
-    sagnac = np.cross(rot_matrix, SatComPos)
+    sagnac = np.dot(rot_matrix, SatComPos)
 
     return sagnac
 
@@ -150,7 +150,15 @@ def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
 
 
 def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
-    pass
+
+    SatBiaInfo = SatBiaInfo[SatBiaInfo[SatBiaIdx["CONST"]] == SatLabel[:1]]
+    SatBiaInfo = SatBiaInfo[SatBiaInfo[SatBiaIdx["PRN"]] == SatLabel[1:]]
+
+    CodeBias = (SatBiaInfo[SatBiaIdx["OBS_f1_C"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_C"]]) / (1 + GammaF1F2)
+    PhaseBias = (SatBiaInfo[SatBiaIdx["OBS_f1_P"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_P"]]) / (1 + GammaF1F2)
+    ClockBias = (SatBiaInfo[SatBiaIdx["CLK_f1_C"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["CLK_f2_C"]]) / (1 + GammaF1F2)
+
+    return (CodeBias, PhaseBias, ClockBias)
 
 
 

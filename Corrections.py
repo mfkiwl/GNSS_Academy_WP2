@@ -31,8 +31,8 @@ import numpy as np
 
 
 from Correction_functions import computeLeoComPos, computeSatClkBias, computeRcvrApo, getUERE
-
-
+from COMMON.Misc import findSun
+from InputOutput import LeoPosIdx
 
 STATUS_OK = 1
 
@@ -179,6 +179,8 @@ def runCorrectMeas(Year,
     # ----------------------------------------------------------------------------------------------------------------------------
 
         Sod = SatPrepro["Sod"]
+        SatCorrInfo["Doy"] = LeoPosInfo[LeoPosIdx["DOY"]]
+        SatCorrInfo["Year"] = LeoPosInfo[LeoPosIdx["YEAR"]]
 
         RcvrRefPosXyzCom = computeLeoComPos(Sod, LeoPosInfo)    # Compute the Center of Masses (CoM)
 
@@ -198,9 +200,11 @@ def runCorrectMeas(Year,
 
         #     SatComPos = computeSatComPos(TransmissionTime, SatPosInfo)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
 
-        #     FlightTime = norm(SatComPos - RcvrPos)/Const.SPEED_OF_LIGHT     # Compute Flight Time
+        #     FlightTime = np.linalg.norm(SatComPos - RcvrPos) / Const.SPEED_OF_LIGHT    # Compute Flight Time
 
         #     SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
+
+        SubPos = findSun(SatCorrInfo["Year"], SatCorrInfo["Doy"], Sod)
 
         #     Apo = computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
 
@@ -212,7 +216,7 @@ def runCorrectMeas(Year,
 
         #     SatClkBias += Dtr                   # Apply Dtr to Clock Bias
 
-            SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
+        SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
 
 
         #     CorrCode = SatPrepro["IF_C"] + SatClk + CodeSatBias         # Corrected measurements from previous information
@@ -228,13 +232,15 @@ def runCorrectMeas(Year,
         # CodeResidual -= RcvrClk     # Remove Receiver Clock from residuals
         # PhaseResidual -= RcvrClk
 
-        else:
-            SatCorrInfo["Status"] = 0
 
         # Assigning values
         SatCorrInfo["Sod"] = Sod
         SatCorrInfo["Elevation"] = SatPrepro["Elevation"]
         SatCorrInfo["Azimuth"] = SatPrepro["Azimuth"]
+
+        if SatCorrInfo["Dtr"] == Const.NAN or SatCorrInfo["CORR-CODE"] == 0 or SatCorrInfo["CORR-PHASE"] == 0 or \
+            SatCorrInfo["GEOM-RNGE"] == 0:
+            SatCorrInfo["Status"] = 0
 
         try:
             SatCorrInfo["SigmaUere"] = SigmaUERE
