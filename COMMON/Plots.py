@@ -160,6 +160,9 @@ def generateLinesPlot(PlotConf):
         if key == "ColorBar" or key == "ColorBarDiscrete":
             normalize, cmap, colors = prepareColorBar(PlotConf, ax, PlotConf["zData"])
 
+        if key == "Map" and PlotConf[key] == True:
+            drawMap(PlotConf, ax)
+
     for Label in PlotConf["yData"].keys():
 
         if "ColorBarDiscrete" in PlotConf:
