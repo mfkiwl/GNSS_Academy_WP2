@@ -146,7 +146,10 @@ def applySagnac(SatComPos, FlightTime):
 
 
 def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
-    pass
+    SatApoInfo = SatApoInfo[SatApoInfo[SatApoIdx["CONST"]] == SatLabel[:1]]
+    SatApoInfo = SatApoInfo[SatApoInfo[SatApoIdx["PRN"]] == SatLabel[1:]]
+
+    # From Center of Masses, Receiver Position, Sun Position and Antenna Phase Offset, compute Antenna Phase Offset position
 
 
 def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
