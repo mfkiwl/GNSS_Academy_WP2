@@ -44,7 +44,7 @@ from InputOutput import PreproHdr, CorrHdr
 from InputOutput import CSNEPOCHS, CSNPOINTS
 from Preprocessing import runPreprocessing
 # from PreprocessingPlots import generatePreproPlots
-from PreprocessingPlots import generateCorrPlots
+from CorrectionsPlots import generateCorrPlots
 from COMMON.Dates import convertJulianDay2YearMonthDay
 from COMMON.Dates import convertYearMonthDay2Doy
 from Corrections import runCorrectMeas
@@ -192,8 +192,8 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
             '/OUT/CORR/' + "CORR_%s_Y%02dD%03d.dat" % \
                 (Conf['SAT_ACRONYM'], Year % 100, Doy)
 
-    #     # Create output file
-    #     fcorr = createOutputFile(PreproObsFile, CorrHdr)
+        # # Create output file
+        # fcorr = createOutputFile(PreproObsFile, CorrHdr)
 
     # Initialize Variables
     EndOfFile = False

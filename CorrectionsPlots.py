@@ -29,7 +29,7 @@ from collections import OrderedDict
 
 from COMMON.Plots import generatePlot
 import matplotlib.pyplot as plt
-
+from COMMON.Coordinates import xyz2llh
 
 def initPlot(PreproObsFile, PlotConf, Title, Label):
     PreproObsFileName = os.path.basename(PreproObsFile)
@@ -61,10 +61,66 @@ def convert_satlabel_to_const(value):
 
 # Plot Satellite Tracks
 def plotSatTracks(PreproObsFile, CorrData):
-    # Use the Map
-    pass
+    PlotConf = {}
 
+    PlotConf["Type"] = "Lines"
+    PlotConf["FigSize"] = (16.8,15.2)
+    PlotConf["Title"] = "Satellite Tracks"
 
+    PlotConf["LonMin"] = -135
+    PlotConf["LonMax"] = 135
+    PlotConf["LatMin"] = -35
+    PlotConf["LatMax"] = 90
+    PlotConf["LonStep"] = 15
+    PlotConf["LatStep"] = 10
+
+    # PlotConf["yLabel"] = "Latitude [deg]"
+    PlotConf["yTicks"] = range(PlotConf["LatMin"],PlotConf["LatMax"]+1,10)
+    PlotConf["yLim"] = [PlotConf["LatMin"], PlotConf["LatMax"]]
+
+    # PlotConf["xLabel"] = "Longitude [deg]"
+    PlotConf["xTicks"] = range(PlotConf["LonMin"],PlotConf["LonMax"]+1,15)
+    PlotConf["xLim"] = [PlotConf["LonMin"], PlotConf["LonMax"]]
+
+    PlotConf["Grid"] = True
+
+    PlotConf["Map"] = True
+
+    PlotConf["Marker"] = '.'
+    PlotConf["LineWidth"] = 1.5
+
+    PlotConf["ColorBar"] = "gnuplot"
+    PlotConf["ColorBarLabel"] = "Elevation [deg]"
+    PlotConf["ColorBarMin"] = 0.
+    PlotConf["ColorBarMax"] = 90.
+
+    # Transform ECEF to Geodetic
+    CorrData[CorrIdx["SAT-X"]].to_numpy()
+    CorrData[CorrIdx["SAT-Y"]].to_numpy()
+    CorrData[CorrIdx["SAT-Z"]].to_numpy()
+    DataLen = len(CorrData[CorrIdx["SAT-X"]])
+    Longitude = np.zeros(DataLen)
+    Latitude = np.zeros(DataLen)
+    # transformer = Transformer.from_crs('epsg:4978', 'epsg:4326')
+    for index in range(DataLen):
+        x = CorrData[CorrIdx["SAT-X"]][index]
+        y = CorrData[CorrIdx["SAT-Y"]][index]
+        z = CorrData[CorrIdx["SAT-Z"]][index]
+        Longitude[index], Latitude[index], h = xyz2llh(x, y, z)
+        # Latitude[index], Longitude[index], h = transformer.transform(x, y, z)
+
+    PlotConf["xData"] = {}
+    PlotConf["yData"] = {}
+    PlotConf["zData"] = {}
+    Label = 0
+    PlotConf["xData"][Label] = Longitude
+    PlotConf["yData"][Label] = Latitude
+    PlotConf["zData"][Label] = CorrData[CorrIdx["ELEV"]]
+
+    PlotConf["Path"] = sys.argv[1] + '/OUT/CORR/FIGURES/' + 'SAT_TRACKS_D011Y24.png'
+
+    # Call generatePlot from Plots library
+    generatePlot(PlotConf)
 
 # Plot Flight Time
 def plotFlightTime(PreproObsFile, CorrData):
@@ -438,7 +494,7 @@ def generateCorrPlots(PreproObsFile):
     # ----------------------------------------------------------
     # Read the cols we need from PREPRO OBS file
     CorrData = read_csv(PreproObsFile, delim_whitespace=True, skiprows=1, header=None,\
-    usecols=[CorrIdx["SAT-X"],CorrIdx["SAT-X"],CorrIdx["CONST"],CorrIdx["PRN"],CorrIdx["FLAG"],CorrIdx["ELEV"]])
+    usecols=[CorrIdx["SAT-X"],CorrIdx["SAT-Y"],CorrIdx["SAT-Z"],CorrIdx["CONST"],CorrIdx["PRN"],CorrIdx["FLAG"],CorrIdx["ELEV"]])
     
     print('INFO: Plot Satellite Tracks ...')
 

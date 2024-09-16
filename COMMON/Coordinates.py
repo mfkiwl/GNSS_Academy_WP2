@@ -18,12 +18,15 @@ def xyz2llh(x,y,z):
     N = math.pow(a,2.0)/math.sqrt(math.pow(a*cs,2.0)+math.pow(b*sn,2.0))
     h = p/cs - N
     while abs(h-h_old) > 1.0e-6:
-        h_old = h
-        theta = math.atan2(z,p*(1.0-math.pow(e,2.0)*N/(N+h)))
-        cs = math.cos(theta)
-        sn = math.sin(theta)
-        N = math.pow(a,2.0)/math.sqrt(math.pow(a*cs,2.0)+math.pow(b*sn,2.0))
-        h = p/cs - N
+        try:
+            h_old = h
+            theta = math.atan2(z,p*(1.0-math.pow(e,2.0)*N/(N+h)))
+            cs = math.cos(theta)
+            sn = math.sin(theta)
+            N = math.pow(a,2.0)/math.sqrt(math.pow(a*cs,2.0)+math.pow(b*sn,2.0))
+            h = p/cs - N
+        except:
+            pass
     Rad2Deg = 180.0 / math.pi
     return clambda * Rad2Deg, theta * Rad2Deg, h
 
