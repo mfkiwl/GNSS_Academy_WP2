@@ -109,8 +109,8 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
 
     # STEP 2: -------------------------------------------------------------------
     # Acquiring Antenna Phase Center by using the previous data
-    COM_to_ARP = ARP - COM
-    APC_at_SRF = COM_to_ARP + PCO       # This is referred to the Satellite Reference Frame, use quarternials to move to ECI coordinates
+    COM_to_ARP = np.subtract(ARP, COM)
+    APC_at_SRF = np.add(COM_to_ARP, PCO)       # This is referred to the Satellite Reference Frame, use quarternials to move to ECI coordinates
 
     # STEP 3: -------------------------------------------------------------------
     # Apply Satellite Quaternions to rotate the Satellite Frame Reference towards the Earth Centered Inertial (ECI) by building the Rotation Matrix
