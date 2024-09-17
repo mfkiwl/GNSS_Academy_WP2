@@ -192,8 +192,8 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
             '/OUT/CORR/' + "CORR_%s_Y%02dD%03d.dat" % \
                 (Conf['SAT_ACRONYM'], Year % 100, Doy)
 
-        # # Create output file
-        # fcorr = createOutputFile(PreproObsFile, CorrHdr)
+        # Create output file
+        fcorr = createOutputFile(CorrFile, CorrHdr)
 
     # Initialize Variables
     EndOfFile = False
@@ -281,10 +281,10 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             # Sod_1
                                                                             )
 
-                    # # If CORR outputs are requested
-                    # if Conf["CORR_OUT"] == 1:
-                    #     # Generate output file
-                    #     generateCorrFile(fcorr, CorrInfo)
+                    # If CORR outputs are requested
+                    if Conf["CORR_OUT"] == 1:
+                        # Generate output file
+                        generateCorrFile(fcorr, CorrInfo)
 
     # If PREPRO outputs are requested
     if Conf["PREPRO_OUT"] == 1:

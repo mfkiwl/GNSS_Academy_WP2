@@ -42,6 +42,8 @@ def computeLeoComPos(Sod, LeoPosInfo):
     return (xPos, yPos, zPos)
 
 
+
+
 def computeSatClkBias(Sod, SatLabel, SatClkInfo):
     # Things to discuss, there are acases where the Sod is 20 but this clk uses jump of 30 seconds
     clock_bias = 0
@@ -91,8 +93,11 @@ def computeSatClkBias(Sod, SatLabel, SatClkInfo):
     return clock_bias
 
 
+
+
 def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     
+    # STEP 1: -------------------------------------------------------------------
     # Acquiring Center of Masses, Antenna Reference Frame and Phase Center Offset
     COM = Conf['LEO_COM_POS']
     ARP = Conf['LEO_ARP_POS']
@@ -101,9 +106,14 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
         PCO = Conf['LEO_PCO_GPS']
     elif SatLabel[0] == 'E':
         PCO = Conf['LEO_PCO_GAL']
-    # COM -> ARP -> APC
-    APC = ARP - PCO     # Acquiring Antenna Phase Center (APC), as PCO is the difference between ARP and APC
 
+    # STEP 2: -------------------------------------------------------------------
+    # Acquiring Antenna Phase Center by using the previous data
+    COM_to_ARP = ARP - COM
+    APC_at_SRF = COM_to_ARP + PCO       # This is referred to the Satellite Reference Frame, use quarternials to move to ECI coordinates
+
+    # STEP 3: -------------------------------------------------------------------
+    # Apply Satellite Quaternions to rotate the Satellite Frame Reference towards the Earth Centered Inertial (ECI) by building the Rotation Matrix
     LeoQuatInfo = LeoQuatInfo[LeoQuatInfo[LeoQuatIdx["SOD"]] == Sod]
 
     # Converting SOD from object to int
@@ -118,6 +128,13 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
                                 [   2*(q1*q3 - q0*q2),       2*(q0*q1 + q2*q3),         (1 - 2*q1**2 - 2*q2**2)]
                                 ])
 
+    APC_at_SRF = np.array(APC_at_SRF)
+
+    APC_at_ECI = np.dot(rotation_matrix, APC_at_SRF)
+
+    # STEP 4: -------------------------------------------------------------------
+    # Convert ECI coordinates to ECEF coordinates with the simplified model for Greenwich Siderial Time
+
     # Acquiring Greenwich Siderial Time Reference, but need to obtain Jualian Day Number and fraction of the day first
     JDN = convertYearDoy2JulianDay(Year, Doy, Sod) - 2415020    # Julian Day Number
     fday = Sod / Const.S_IN_D                                   # fday is Fractional part of the day
@@ -125,12 +142,60 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     gstr = modulo(279.690983 + 0.9856473354*JDN + 360*fday + 180, 360)      # Convert o radians and rotate it over the third axis (Applying Earth Rotation)
     gstr = np.deg2rad(gstr)     # Corvert it from degree to radian
 
-    # STILL IN PROCESS ( How to compute ECI to ECEF and acquire XYZ Position ???? )
+
+    # Build rotation matrix for ECI to ECEF conversion based on GST
+    rotation_matrix = np.array([[np.cos(gstr),      np.sin(gstr),       0],
+                                [-np.sin(gstr),     np.cos(gstr),       0],
+                                [0,                 0,                  1]
+                                ])
+
+    APC_at_ECEF_coordinates = np.dot(rotation_matrix, APC_at_ECI)
+
+    return APC_at_ECEF_coordinates
 
 
 
-def computeSatComPos(TransmissionTime, SatPosInfo):
-    pass
+
+def lagrange_basis(x, x_values, i):
+    L_i = 1.0
+    n = len(x_values)
+    for j in range(n):
+        if j != i:
+            L_i *= (x - x_values[j]) / (x_values[i] - x_values[j])
+    return L_i
+
+def lagrange_interpolation(x, x_values, y_values):
+    n = len(x_values)
+    y = 0.0
+    for i in range(n):
+        y += y_values[i] * lagrange_basis(x, x_values, i)
+    return y
+
+def computeSatComPos(Sod, TransmissionTime, SatPosInfo): # Apply Lagrange 10 points
+    
+    # Filter to get 10 points of its data
+    SatPosInfo = SatPosInfo[(SatPosInfo[SatPosIdx["SOD"]] > Sod - 5 * Sod) and (SatPosInfo[SatPosIdx["SOD"]] <  6 * Sod)]
+
+    times = SatPosInfo[SatPosIdx["SOD"]].values
+    xSatPos = SatPosInfo[SatPosIdx["xCM"]].values
+    ySatPos = SatPosInfo[SatPosIdx["yCM"]].values
+    zSatPos = SatPosInfo[SatPosIdx["zCM"]].values
+
+    # Get the indices of the 10 closest times to TransmissionTime
+    closest_indices = np.argsort(np.abs(times - TransmissionTime))[:10]
+
+    # Select the corresponding times and positions for interpolation
+    closest_times = times[closest_indices]
+    closest_x = xSatPos[closest_indices]
+    closest_y = ySatPos[closest_indices]
+    closest_z = zSatPos[closest_indices]
+
+    x_CoM = lagrange_interpolation(TransmissionTime, closest_times, closest_x)
+    y_CoM = lagrange_interpolation(TransmissionTime, closest_times, closest_y)
+    z_CoM = lagrange_interpolation(TransmissionTime, closest_times, closest_z)
+    
+    return (x_CoM, y_CoM, z_CoM)
+
 
 
 def applySagnac(SatComPos, FlightTime):
@@ -145,11 +210,27 @@ def applySagnac(SatComPos, FlightTime):
     return sagnac
 
 
+
+
 def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
     SatApoInfo = SatApoInfo[SatApoInfo[SatApoIdx["CONST"]] == SatLabel[:1]]
     SatApoInfo = SatApoInfo[SatApoInfo[SatApoIdx["PRN"]] == SatLabel[1:]]
 
     # From Center of Masses, Receiver Position, Sun Position and Antenna Phase Offset, compute Antenna Phase Offset position
+
+    k = np.linalg.norm(SatComPos)
+
+    e = np.linalg.norm(SunPos - SatComPos)
+    j = np.cross(k, e)
+
+    i = np.cross(j, k)
+
+    R = np.array([i, j, k])
+
+    APO = SatComPos + np.dot(R, RcvrPos)
+
+    return APO
+
 
 
 def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
@@ -161,12 +242,23 @@ def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
     PhaseBias = (SatBiaInfo[SatBiaIdx["OBS_f1_P"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_P"]]) / (1 + GammaF1F2)
     ClockBias = (SatBiaInfo[SatBiaIdx["CLK_f1_C"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["CLK_f2_C"]]) / (1 + GammaF1F2)
 
-    return (CodeBias, PhaseBias, ClockBias)
+    return CodeBias, PhaseBias, ClockBias
+
 
 
 
 def computeDtr(SatComPos_1, SatComPos, Sod, Sod_1):
-    pass
+    # DTR = -2 * (Satellite Position * Velocity Satellite)/ Speed of Light ^2
+    # Calculate the time difference in seconds
+    delta_t = Sod - Sod_1
+    
+    # Calculate the distance difference (Euclidean distance)
+    delta_r = np.linalg.norm(SatComPos - SatComPos_1)
+    dtr = delta_r / (Const.SPEED_OF_LIGHT * delta_t)
+
+    return dtr
+
+
 
 
 def getUERE(Conf, SatLabel):
@@ -180,10 +272,38 @@ def getUERE(Conf, SatLabel):
 
     return sigmaUERE
 
+
+
+
 def computeGeoRange(SatCopPos, RcvrPos):
-    pass
+    # Taking into account that both arguments have X, Y and Z coordinates
+
+    SatCopPos = np.array(SatCopPos)
+    RcvrPos = np.array(RcvrPos)
+    
+    diff_vector = SatCopPos - RcvrPos
+    
+    # Calculate the geometrical range (at Euclidean distance) ????
+    geo_range = np.linalg.norm(diff_vector)
+
+    return geo_range
+
 
 
 
 def estimateRcvrClk(CodeResidual, SigmaUERE):
-    pass
+
+    CodeResidual = np.array(CodeResidual)
+    SigmaUERE = np.array(SigmaUERE)
+    
+    # Calculate weights as the inverse of the variances (SigmaUERE squared)
+    weights = 1 / (SigmaUERE ** 2)
+    
+    # Compute the weighted average of the residuals
+    weighted_sum = np.sum(weights * CodeResidual)
+    total_weight = np.sum(weights)
+    
+    # Calculate the receiver clock bias estimate
+    rcvr_clk_bias_estimate = weighted_sum / total_weight
+    
+    return rcvr_clk_bias_estimate
