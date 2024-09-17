@@ -171,15 +171,32 @@ def lagrange_interpolation(x, x_values, y_values):
         y += y_values[i] * lagrange_basis(x, x_values, i)
     return y
 
-def computeSatComPos(Sod, TransmissionTime, SatPosInfo): # Apply Lagrange 10 points
+def computeSatComPos(TransmissionTime, SatPosInfo): # Apply Lagrange 10 points
     
     # Filter to get 10 points of its data
-    SatPosInfo = SatPosInfo[(SatPosInfo[SatPosIdx["SOD"]] > Sod - 5 * Sod) and (SatPosInfo[SatPosIdx["SOD"]] <  6 * Sod)]
+
+    # This is not working because the step is about 300 points
+    # if Sod < 50:
+    #     n_min = 0
+    #     n_max = (100 - Sod) / 10
+    # else:
+    #     n_min = 1
+    #     n_min = 5
+
+    # SatPosInfo = SatPosInfo[SatPosInfo[SatPosIdx["SOD"]].astype(int) > n_min * Sod]
+    # SatPosInfo = SatPosInfo[SatPosInfo[SatPosIdx["SOD"]].astype(int) < (Sod + n_max*10) ]
 
     times = SatPosInfo[SatPosIdx["SOD"]].values
+    times = times.astype(int)
+
     xSatPos = SatPosInfo[SatPosIdx["xCM"]].values
+    xSatPos = xSatPos.astype(float)
+
     ySatPos = SatPosInfo[SatPosIdx["yCM"]].values
+    ySatPos = ySatPos.astype(float)
+
     zSatPos = SatPosInfo[SatPosIdx["zCM"]].values
+    zSatPos = zSatPos.astype(float)
 
     # Get the indices of the 10 closest times to TransmissionTime
     closest_indices = np.argsort(np.abs(times - TransmissionTime))[:10]

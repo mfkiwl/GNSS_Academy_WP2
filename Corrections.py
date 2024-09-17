@@ -197,25 +197,25 @@ def runCorrectMeas(Year,
 
 
 
-        #     RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
+            RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
 
-        #     SatComPos = computeSatComPos(Sod, TransmissionTime, SatPosInfo)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
+            SatComPos = computeSatComPos(TransmissionTime, SatPosInfo)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
 
-        #     FlightTime = np.linalg.norm(SatComPos - RcvrRefPosXyz) / Const.SPEED_OF_LIGHT    # Compute Flight Time
+            FlightTime = np.linalg.norm(SatComPos - RcvrRefPosXyz) / Const.SPEED_OF_LIGHT    # Compute Flight Time
 
-        #     SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
+            SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
 
-        #     SunPos = findSun(SatCorrInfo["Year"], SatCorrInfo["Doy"], Sod)
+            SunPos = findSun(SatCorrInfo["Year"], SatCorrInfo["Doy"], Sod)
 
-        #     Apo = computeSatApo(SatLabel, SatComPos, RcvrPosXyz, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
+            Apo = computeSatApo(SatLabel, SatComPos, RcvrPosXyz, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
 
-        #     SatCopPos = SatComPos + Apo         # Apply APOs to the Satellite Position
+            SatCopPos = SatComPos + Apo         # Apply APOs to the Satellite Position
 
-        #     CodeSatBias, PhaseSatBias, ClockBias = getSatBias(GammaF1F2, SatLabel, SatBiaInfo)   #Get SAtellite Biases in meters
+            CodeSatBias, PhaseSatBias, SatClkBias = getSatBias(GammaF1F2, SatLabel, SatBiaInfo)   #Get SAtellite Biases in meters
 
-        #     # Dtr = computeDtr(SatComPos_1, SatComPos, Sod, Sod_1)            # Compute relativistic correction
+            # Dtr = computeDtr(SatComPos_1, SatComPos, Sod, Sod_1)            # Compute relativistic correction
 
-        #     SatClkBias += Dtr                   # Apply Dtr to Clock Bias
+            # SatClkBias += Dtr                   # Apply Dtr to Clock Bias
 
             SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
 
