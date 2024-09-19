@@ -42,10 +42,10 @@ def computeLeoComPos(Sod, LeoPosInfo):
     return (xPos, yPos, zPos)
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def computeSatClkBias(Sod, SatLabel, SatClkInfo):
-    # Things to discuss, there are acases where the Sod is 20 but this clk uses jump of 30 seconds
+    # Things to discuss, there are cases where the Sod is 20 but this clk uses jump of 30 seconds
     clock_bias = 0
     close_value_down = close_value_up = 0   # In case of not having any Sod similar, interpolate between the closest values
 
@@ -93,7 +93,7 @@ def computeSatClkBias(Sod, SatLabel, SatClkInfo):
     return clock_bias
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     
@@ -154,7 +154,7 @@ def computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo):
     return APC_at_ECEF_coordinates
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def lagrange_basis(x, x_values, i):
     L_i = 1.0
@@ -171,10 +171,9 @@ def lagrange_interpolation(x, x_values, y_values):
         y += y_values[i] * lagrange_basis(x, x_values, i)
     return y
 
-def computeSatComPos(TransmissionTime, SatPosInfo): # Apply Lagrange 10 points
+def computeSatComPos(TransmissionTime, SatPosInfo, SatLabel): # Apply Lagrange 10 points
     
     # Filter to get 10 points of its data
-
     # This is not working because the step is about 300 points
     # if Sod < 50:
     #     n_min = 0
@@ -185,6 +184,9 @@ def computeSatComPos(TransmissionTime, SatPosInfo): # Apply Lagrange 10 points
 
     # SatPosInfo = SatPosInfo[SatPosInfo[SatPosIdx["SOD"]].astype(int) > n_min * Sod]
     # SatPosInfo = SatPosInfo[SatPosInfo[SatPosIdx["SOD"]].astype(int) < (Sod + n_max*10) ]
+    SatPosInfo = SatPosInfo[SatPosInfo[SatPosIdx["CONST"]] == SatLabel[:1]]
+    SatPosInfo = SatPosInfo[SatPosInfo[SatPosIdx["PRN"]] == SatLabel[1:]]
+
 
     times = SatPosInfo[SatPosIdx["SOD"]].values
     times = times.astype(int)
@@ -214,6 +216,7 @@ def computeSatComPos(TransmissionTime, SatPosInfo): # Apply Lagrange 10 points
     return (x_CoM, y_CoM, z_CoM)
 
 
+# -----------------------------------------------------------------------------------------------------------------------
 
 def applySagnac(SatComPos, FlightTime):
 
@@ -227,7 +230,7 @@ def applySagnac(SatComPos, FlightTime):
     return sagnac
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
     SatApoInfo = SatApoInfo[SatApoInfo[SatApoIdx["CONST"]] == SatLabel[:1]]
@@ -238,9 +241,11 @@ def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
     k = np.linalg.norm(SatComPos)
 
     e = np.linalg.norm(SunPos - SatComPos)
-    j = np.cross(k, e)
+    # j = np.cross(k, e)
+    j = np.dot(k, e)
 
-    i = np.cross(j, k)
+    # i = np.cross(j, k)
+    i = np.dot(j, k)
 
     R = np.array([i, j, k])
 
@@ -249,6 +254,7 @@ def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
     return APO
 
 
+# -----------------------------------------------------------------------------------------------------------------------
 
 def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
 
@@ -262,21 +268,19 @@ def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
     return CodeBias, PhaseBias, ClockBias
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def computeDtr(SatComPos_1, SatComPos, Sod, Sod_1):
-    # DTR = -2 * (Satellite Position * Velocity Satellite)/ Speed of Light ^2
-    # Calculate the time difference in seconds
-    delta_t = Sod - Sod_1
-    
-    # Calculate the distance difference (Euclidean distance)
-    delta_r = np.linalg.norm(SatComPos - SatComPos_1)
-    dtr = delta_r / (Const.SPEED_OF_LIGHT * delta_t)
+    # DTR = -2 * (Satellite Position * Velocity Satellite)/ Speed of Light
+
+    velocity = (SatComPos - SatComPos_1) / (Sod - Sod_1)
+
+    dtr = -2 * (SatComPos * velocity) / (Const.SPEED_OF_LIGHT)
 
     return dtr
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def getUERE(Conf, SatLabel):
     sigmaUERE = 0
@@ -290,7 +294,7 @@ def getUERE(Conf, SatLabel):
     return sigmaUERE
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def computeGeoRange(SatCopPos, RcvrPos):
     # Taking into account that both arguments have X, Y and Z coordinates
@@ -306,7 +310,7 @@ def computeGeoRange(SatCopPos, RcvrPos):
     return geo_range
 
 
-
+# -----------------------------------------------------------------------------------------------------------------------
 
 def estimateRcvrClk(CodeResidual, SigmaUERE):
 

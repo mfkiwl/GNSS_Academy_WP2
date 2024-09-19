@@ -199,13 +199,13 @@ def runCorrectMeas(Year,
 
             RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
 
-            SatComPos = computeSatComPos(TransmissionTime, SatPosInfo)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
+            SatComPos = computeSatComPos(TransmissionTime, SatPosInfo, SatLabel)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
 
             FlightTime = np.linalg.norm(SatComPos - RcvrRefPosXyz) / Const.SPEED_OF_LIGHT    # Compute Flight Time
 
             SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
 
-            SunPos = findSun(SatCorrInfo["Year"], SatCorrInfo["Doy"], Sod)
+            SunPos = findSun(SatCorrInfo["Year"].iloc[0], SatCorrInfo["Doy"].iloc[0], Sod)
 
             Apo = computeSatApo(SatLabel, SatComPos, RcvrPosXyz, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
 
@@ -220,13 +220,13 @@ def runCorrectMeas(Year,
             SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
 
 
-        #     CorrCode = SatPrepro["IF_C"] + ClockBias + CodeSatBias         # Corrected measurements from previous information
-        #     CorrPhase = SatPrepro["IF_P"] + ClockBias + PhaseSatBias       # In the statement is miswritten (IF_L)
+            CorrCode = SatPrepro["IF_C"] + SatClkBias + CodeSatBias         # Corrected measurements from previous information
+            CorrPhase = SatPrepro["IF_P"] + SatClkBias + PhaseSatBias       # In the statement is miswritten (IF_L)
 
-        #     GeomRange = computeGeoRange(SatCopPos, RcvrRefPosXyz)             # COmpute Geometrical Range
+            GeomRange = computeGeoRange(SatCopPos, RcvrRefPosXyz)             # COmpute Geometrical Range
 
-        #     CodeResidual = CorrCode - GeomRange                         # Comute the first Residual removing the geometrical range (They include Recevier Clock Estimation)
-        #     PhaseResidual = CorrPhase - GeomRange
+            CodeResidual = CorrCode - GeomRange                         # Comute the first Residual removing the geometrical range (They include Recevier Clock Estimation)
+            PhaseResidual = CorrPhase - GeomRange
 
         # RcvrClk = estimateRcvrClk(CodeResidual, SigmaUERE)      # Estimate the Receiver Clock first guess as a weighted average of the residuals  
 
@@ -248,6 +248,13 @@ def runCorrectMeas(Year,
         except:
             pass
 
+        # ---------------------------------------------------------------------------------
+
+
+        # STILL IN PROCESS: ASSIGN THE RESPECTIVE DATA TO OUTPUT
+
+
+        # ---------------------------------------------------------------------------------
 
         CorrInfo[SatLabel] = SatCorrInfo
 
