@@ -217,21 +217,24 @@ def runCorrectMeas(Year,
 
             # SatClkBias += Dtr                   # Apply Dtr to Clock Bias
 
-            SigmaUERE = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
+            SatCorrInfo["SigmaUere"]  = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
 
 
-            CorrCode = SatPrepro["IF_C"] + SatClkBias + CodeSatBias         # Corrected measurements from previous information
-            CorrPhase = SatPrepro["IF_P"] + SatClkBias + PhaseSatBias       # In the statement is miswritten (IF_L)
+            SatCorrInfo["CorrCode"] = SatPrepro["IF_C"] + SatClkBias + CodeSatBias         # Corrected measurements from previous information
+            SatCorrInfo["CorrPhase"] = SatPrepro["IF_P"] + SatClkBias + PhaseSatBias       # In the statement is miswritten (IF_L)
 
-            GeomRange = computeGeoRange(SatCopPos, RcvrRefPosXyz)             # COmpute Geometrical Range
+            SatCorrInfo["GEOM-RNGE"] = computeGeoRange(SatCopPos, RcvrRefPosXyz)             # COmpute Geometrical Range
 
-            CodeResidual = CorrCode - GeomRange                         # Comute the first Residual removing the geometrical range (They include Recevier Clock Estimation)
-            PhaseResidual = CorrPhase - GeomRange
+            SatCorrInfo["CodeResidual"] = SatCorrInfo["CorrCode"] - SatCorrInfo["GEOM-RNGE"]                          # Comute the first Residual removing the geometrical range (They include Recevier Clock Estimation)
+            SatCorrInfo["PhaseResidual"]  = SatCorrInfo["CorrPhase"] - SatCorrInfo["GEOM-RNGE"] 
 
-        # RcvrClk = estimateRcvrClk(CodeResidual, SigmaUERE)      # Estimate the Receiver Clock first guess as a weighted average of the residuals  
+        try:
+            SatCorrInfo["RcvrClk"] = estimateRcvrClk(SatCorrInfo["CodeResidual"], SatCorrInfo["SigmaUere"])      # Estimate the Receiver Clock first guess as a weighted average of the residuals  
 
-        # CodeResidual -= RcvrClk     # Remove Receiver Clock from residuals
-        # PhaseResidual -= RcvrClk
+            SatCorrInfo["CodeResidual"] -= SatCorrInfo["RcvrClk"]     # Remove Receiver Clock from residuals
+            SatCorrInfo["PhaseResidual"] -= SatCorrInfo["RcvrClk"]
+        except:
+            pass
 
 
         # Assigning values
@@ -239,14 +242,10 @@ def runCorrectMeas(Year,
         SatCorrInfo["Elevation"] = SatPrepro["Elevation"]
         SatCorrInfo["Azimuth"] = SatPrepro["Azimuth"]
 
-        try:
-            if SatCorrInfo["Dtr"] == Const.NAN or SatCorrInfo["CORR-CODE"] == 0 or SatCorrInfo["CORR-PHASE"] == 0 or \
-                SatCorrInfo["GEOM-RNGE"] == 0:
-                SatCorrInfo["Status"] = 0
-
-            SatCorrInfo["SigmaUere"] = SigmaUERE
-        except:
-            pass
+        if SatCorrInfo["Dtr"] == Const.NAN or SatCorrInfo["CorrCode"] == 0 or SatCorrInfo["CorrPhase"] == 0 \
+        or SatCorrInfo["GEOM-RNGE"] == 0:
+            SatCorrInfo["Status"] = 0
+        
 
         # ---------------------------------------------------------------------------------
 
