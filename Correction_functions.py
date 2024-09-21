@@ -221,6 +221,7 @@ def computeSatComPos(TransmissionTime, SatPosInfo, SatLabel): # Apply Lagrange 1
 def applySagnac(SatComPos, FlightTime):
 
     angle = Const.OMEGA_EARTH * FlightTime
+    # angle = np.deg2rad(angle)
     rot_matrix = np.array( [[np.cos(angle),    np.sin(angle),   0],
                             [-np.sin(angle),   np.cos(angle),   0],
                             [0,                0,               1]])
@@ -238,14 +239,16 @@ def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
 
     # From Center of Masses, Receiver Position, Sun Position and Antenna Phase Offset, compute Antenna Phase Offset position
 
-    k = np.linalg.norm(SatComPos)
+    norm = np.linalg.norm(SatComPos)
+    k = SatComPos / norm
 
-    e = np.linalg.norm(SunPos - SatComPos)
-    # j = np.cross(k, e)
-    j = np.dot(k, e)
+    norm = np.linalg.norm(SunPos - SatComPos)
+    e = (SunPos - SatComPos) / norm
+    j = np.cross(k, e)
+    # j = np.dot(k, e)
 
-    # i = np.cross(j, k)
-    i = np.dot(j, k)
+    i = np.cross(j, k)
+    # i = np.dot(j, k)
 
     R = np.array([i, j, k])
 
@@ -261,9 +264,9 @@ def getSatBias(GammaF1F2, SatLabel, SatBiaInfo):
     SatBiaInfo = SatBiaInfo[SatBiaInfo[SatBiaIdx["CONST"]] == SatLabel[:1]]
     SatBiaInfo = SatBiaInfo[SatBiaInfo[SatBiaIdx["PRN"]] == SatLabel[1:]]
 
-    CodeBias = (SatBiaInfo[SatBiaIdx["OBS_f1_C"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_C"]]) / (1 + GammaF1F2)
-    PhaseBias = (SatBiaInfo[SatBiaIdx["OBS_f1_P"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_P"]]) / (1 + GammaF1F2)
-    ClockBias = (SatBiaInfo[SatBiaIdx["CLK_f1_C"]] + GammaF1F2 * SatBiaInfo[SatBiaIdx["CLK_f2_C"]]) / (1 + GammaF1F2)
+    CodeBias = (SatBiaInfo[SatBiaIdx["OBS_f1_C"]].astype(float) + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_C"]].astype(float)) / (1 + GammaF1F2)
+    PhaseBias = (SatBiaInfo[SatBiaIdx["OBS_f1_P"]].astype(float) + GammaF1F2 * SatBiaInfo[SatBiaIdx["OBS_f2_P"]].astype(float)) / (1 + GammaF1F2)
+    ClockBias = (SatBiaInfo[SatBiaIdx["CLK_f1_C"]].astype(float) + GammaF1F2 * SatBiaInfo[SatBiaIdx["CLK_f2_C"]].astype(float)) / (1 + GammaF1F2)
 
     return CodeBias, PhaseBias, ClockBias
 
@@ -313,18 +316,19 @@ def computeGeoRange(SatCopPos, RcvrPos):
 # -----------------------------------------------------------------------------------------------------------------------
 
 def estimateRcvrClk(CodeResidual, SigmaUERE):
-
+    rcvr_clk_bias_estimate = 0
     CodeResidual = np.array(CodeResidual)
     SigmaUERE = np.array(SigmaUERE)
     
     # Calculate weights as the inverse of the variances (SigmaUERE squared)
-    weights = 1 / (SigmaUERE ** 2)
-    
-    # Compute the weighted average of the residuals
-    weighted_sum = np.sum(weights * CodeResidual)
-    total_weight = np.sum(weights)
-    
-    # Calculate the receiver clock bias estimate
-    rcvr_clk_bias_estimate = weighted_sum / total_weight
+    if SigmaUERE != 0:
+        weights = 1 / (SigmaUERE ** 2)
+
+        # Compute the weighted average of the residuals
+        weighted_sum = np.sum(weights * CodeResidual)
+        total_weight = np.sum(weights)
+
+        # Calculate the receiver clock bias estimate
+        rcvr_clk_bias_estimate = weighted_sum / total_weight
     
     return rcvr_clk_bias_estimate
