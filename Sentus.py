@@ -230,6 +230,19 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
 
             } # End of SatPreproObsInfo
 
+
+
+        CorrPrevInfo = {}
+        for const in ['G', 'E']:
+            for prn in range(1, Const.MAX_NUM_SATS_CONSTEL + 1):
+                CorrPrevInfo["%s%02d" % (const,prn)] = {
+                "Sod_Prev": 0,
+                "SatComPos_Prev": (0, 0, 0)
+                } # End of SatPreproObsInfo
+
+
+
+
     # Display Message
     print("INFO: Reading file: %s..." %
     ObsFile)
@@ -277,9 +290,15 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             SatApoInfo,
                                                                             SatClkInfo,
                                                                             SatBiaInfo,
+                                                                            CorrPrevInfo
                                                                             # SatComPos_1,
                                                                             # Sod_1
                                                                             )
+
+                    if len(CorrInfo) > 0:
+                        for PRN in CorrInfo.keys():
+                            CorrPrevInfo["Sod_Prev"] = CorrInfo[PRN]["Sod"]
+                            CorrPrevInfo["SatComPos_Prev"] = (CorrInfo[PRN]["SatX"], CorrInfo[PRN]["SatY"], CorrInfo[PRN]["SatZ"])
 
                     # If CORR outputs are requested
                     if Conf["CORR_OUT"] == 1:

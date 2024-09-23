@@ -47,6 +47,7 @@ def runCorrectMeas(Year,
                     SatApoInfo,
                     SatClkInfo,
                     SatBiaInfo,
+                    CorrPrevInfo
                     # SatComPos_1,
                     # Sod_1
                     ):
@@ -194,8 +195,9 @@ def runCorrectMeas(Year,
             TransmissionTime = Sod - DeltaT - SatClkBias        # Compute Transmission Time
 
             RcvrPosXyz = computeRcvrApo(Conf, Year, Doy, Sod, SatLabel, LeoQuatInfo)
-
-
+            SatCorrInfo["LeoX"] = RcvrPosXyz[0]
+            SatCorrInfo["LeoY"] = RcvrPosXyz[1]
+            SatCorrInfo["LeoZ"] = RcvrPosXyz[2]
 
             RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
 
@@ -204,18 +206,26 @@ def runCorrectMeas(Year,
             FlightTime = np.linalg.norm(SatComPos - RcvrRefPosXyz) / Const.SPEED_OF_LIGHT    # Compute Flight Time
 
             SatComPos = applySagnac(SatComPos, FlightTime)                  # Apply Sagnac correction
+            SatCorrInfo["SatX"] = SatComPos[0]
+            SatCorrInfo["SatY"] = SatComPos[1]
+            SatCorrInfo["SatZ"] = SatComPos[2]
 
             SunPos = findSun(SatCorrInfo["Year"].iloc[0], SatCorrInfo["Doy"].iloc[0], Sod)
 
             Apo = computeSatApo(SatLabel, SatComPos, RcvrPosXyz, SunPos, SatApoInfo)   # Compute Antenna Phase Offset in ECEF from ANTEX APOs in satellite-body reference frame
+            SatCorrInfo["SatApoX"] = Apo[0]
+            SatCorrInfo["SatApoX"] = Apo[1]
+            SatCorrInfo["SatApoX"] = Apo[2]
+
 
             SatCopPos = SatComPos + Apo         # Apply APOs to the Satellite Position
 
             CodeSatBias, PhaseSatBias, SatClkBias = getSatBias(GammaF1F2, SatLabel, SatBiaInfo)   #Get SAtellite Biases in meters
 
-            # Dtr = computeDtr(SatComPos_1, SatComPos, Sod, Sod_1)            # Compute relativistic correction
+            if CorrPrevInfo[SatLabel]["SatComPos_Prev"][0] != 0 and CorrPrevInfo[SatLabel]["SatComPos_Prev"][1] and CorrPrevInfo[SatLabel]["SatComPos_Prev"][2]:
+                SatCorrInfo["Dtr"] = computeDtr(CorrPrevInfo[SatLabel]["SatComPos_Prev"], SatComPos, Sod, CorrPrevInfo[SatLabel]["Sod_Prev"])            # Compute relativistic correction
 
-            # SatClkBias += Dtr                   # Apply Dtr to Clock Bias
+                SatClkBias += SatCorrInfo["Dtr"]                   # Apply Dtr to Clock Bias
 
             SatCorrInfo["SigmaUere"]  = getUERE(Conf, SatLabel)         # Get Sigma UERE from Conf
 
@@ -242,9 +252,9 @@ def runCorrectMeas(Year,
         SatCorrInfo["Elevation"] = SatPrepro["Elevation"]
         SatCorrInfo["Azimuth"] = SatPrepro["Azimuth"]
 
-        if SatCorrInfo["Dtr"] == Const.NAN or SatCorrInfo["CorrCode"] == 0 or SatCorrInfo["CorrPhase"] == 0 \
-        or SatCorrInfo["GEOM-RNGE"] == 0:
-            SatCorrInfo["Status"] = 0
+        # if SatCorrInfo["Dtr"] == Const.NAN or SatCorrInfo["CorrCode"] == 0 or SatCorrInfo["CorrPhase"] == 0 \
+        # or SatCorrInfo["GEOM-RNGE"] == 0:
+        #     SatCorrInfo["Status"] = 0
         
 
         # ---------------------------------------------------------------------------------

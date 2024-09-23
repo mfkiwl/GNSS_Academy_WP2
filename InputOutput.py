@@ -27,6 +27,7 @@ from COMMON.Coordinates import llh2xyz
 import numpy as np
 import pandas as pd
 
+import warnings
 # Input interfaces
 #----------------------------------------------------------------------
 # CONF
@@ -1206,6 +1207,8 @@ def generateCorrFile(fcorr, CorrInfo):
         Outputs["RCVR-CLK"] = SatCorrInfo["RcvrClk"]
 
         Outputs["SUERE"] =SatCorrInfo["SigmaUere"]
+
+        warnings.simplefilter(action='ignore', category=FutureWarning)
 
         # Write line
         for i, result in enumerate(Outputs):
