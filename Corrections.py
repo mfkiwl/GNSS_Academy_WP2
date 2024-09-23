@@ -200,10 +200,13 @@ def runCorrectMeas(Year,
             SatCorrInfo["LeoApoZ"] = RcvrPosXyz[2]
 
             RcvrRefPosXyz = RcvrRefPosXyzCom + RcvrPosXyz
+            SatCorrInfo["LeoX"] = RcvrRefPosXyz[0]
+            SatCorrInfo["LeoY"] = RcvrRefPosXyz[1]
+            SatCorrInfo["LeoZ"] = RcvrRefPosXyz[2]
 
             SatComPos = computeSatComPos(TransmissionTime, SatPosInfo, SatLabel)      # Compute Satellite Center of Masses Position at Tranmission Time, 10-point Langrange interpolation between closer inputs (SP3 positions)
 
-            SatCorrInfo["FlightTime"] = np.linalg.norm(SatComPos - RcvrRefPosXyz) / Const.SPEED_OF_LIGHT    # Compute Flight Time
+            SatCorrInfo["FlightTime"] = (np.linalg.norm(SatComPos - RcvrRefPosXyz) / Const.SPEED_OF_LIGHT)*1000    # Compute Flight Time
 
             SatComPos = applySagnac(SatComPos, SatCorrInfo["FlightTime"])                  # Apply Sagnac correction
             SatCorrInfo["SatX"] = SatComPos[0]
@@ -257,9 +260,9 @@ def runCorrectMeas(Year,
         SatCorrInfo["Elevation"] = SatPrepro["Elevation"]
         SatCorrInfo["Azimuth"] = SatPrepro["Azimuth"]
 
-        # if SatCorrInfo["Dtr"] == Const.NAN or SatCorrInfo["CorrCode"] == 0 or SatCorrInfo["CorrPhase"] == 0 \
-        # or SatCorrInfo["GEOM-RNGE"] == 0:
-        #     SatCorrInfo["Status"] = 0
+        if SatCorrInfo["Dtr"] == 0 or float(SatCorrInfo["CorrCode"]) == 0 or float(SatCorrInfo["CorrPhase"]) == 0 \
+        or float(SatCorrInfo["GEOM-RNGE"]) == 0:
+            SatCorrInfo["Flag"] = 0
         
 
         # ---------------------------------------------------------------------------------

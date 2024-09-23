@@ -33,9 +33,9 @@ def computeLeoComPos(Sod, LeoPosInfo):
         LeoPosInfo = LeoPosInfo.to_numpy()
         value_position = np.where(LeoPosInfo[:,LeoPosIdx["SOD"]] == Sod)[0][0]
 
-        xPos = LeoPosInfo[value_position:, LeoPosIdx["xCM"]][0]
-        yPos = LeoPosInfo[value_position:, LeoPosIdx["yCM"]][0]
-        zPos = LeoPosInfo[value_position:, LeoPosIdx["zCM"]][0]
+        xPos = LeoPosInfo[value_position:, LeoPosIdx["xCM"]][0]*1000
+        yPos = LeoPosInfo[value_position:, LeoPosIdx["yCM"]][0]*1000
+        zPos = LeoPosInfo[value_position:, LeoPosIdx["zCM"]][0]*1000
     except:
         pass
 
@@ -205,9 +205,9 @@ def computeSatComPos(TransmissionTime, SatPosInfo, SatLabel): # Apply Lagrange 1
 
     # Select the corresponding times and positions for interpolation
     closest_times = times[closest_indices]
-    closest_x = xSatPos[closest_indices]
-    closest_y = ySatPos[closest_indices]
-    closest_z = zSatPos[closest_indices]
+    closest_x = xSatPos[closest_indices]*1000
+    closest_y = ySatPos[closest_indices]*1000
+    closest_z = zSatPos[closest_indices]*1000
 
     x_CoM = lagrange_interpolation(TransmissionTime, closest_times, closest_x)
     y_CoM = lagrange_interpolation(TransmissionTime, closest_times, closest_y)
@@ -252,7 +252,8 @@ def computeSatApo(SatLabel, SatComPos, RcvrPos, SunPos, SatApoInfo):
 
     R = np.array([i, j, k])
 
-    APO = SatComPos + np.dot(R, RcvrPos)
+    # APO = SatComPos + np.dot(R, RcvrPos)
+    APO = np.dot(R, RcvrPos)
 
     return APO
 
