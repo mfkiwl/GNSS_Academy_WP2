@@ -44,6 +44,7 @@ from InputOutput import PreproHdr, CorrHdr
 from InputOutput import CSNEPOCHS, CSNPOINTS
 from Preprocessing import runPreprocessing
 # from PreprocessingPlots import generatePreproPlots
+from CorrectionsPlots import generateCorrPlots
 from COMMON.Dates import convertJulianDay2YearMonthDay
 from COMMON.Dates import convertYearMonthDay2Doy
 from Corrections import runCorrectMeas
@@ -187,12 +188,12 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     # If Corrected outputs are activated
     if Conf["CORR_OUT"] == 1:
         # Define the full path and name to the output CORR file
-        PreproObsFile = Scen + \
+        CorrFile = Scen + \
             '/OUT/CORR/' + "CORR_%s_Y%02dD%03d.dat" % \
                 (Conf['SAT_ACRONYM'], Year % 100, Doy)
 
         # Create output file
-        fcorr = createOutputFile(PreproObsFile, CorrHdr)
+        fcorr = createOutputFile(CorrFile, CorrHdr)
 
     # Initialize Variables
     EndOfFile = False
@@ -228,6 +229,19 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                 "PrealignOffset": 0,                                           # Phase prealignment offset
 
             } # End of SatPreproObsInfo
+
+
+
+        CorrPrevInfo = {}
+        for const in ['G', 'E']:
+            for prn in range(1, Const.MAX_NUM_SATS_CONSTEL + 1):
+                CorrPrevInfo["%s%02d" % (const,prn)] = {
+                "Sod_Prev": 0,
+                "SatComPos_Prev": (0, 0, 0)
+                } # End of SatPreproObsInfo
+
+
+
 
     # Display Message
     print("INFO: Reading file: %s..." %
@@ -276,9 +290,15 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
                                                                             SatApoInfo,
                                                                             SatClkInfo,
                                                                             SatBiaInfo,
+                                                                            CorrPrevInfo
                                                                             # SatComPos_1,
                                                                             # Sod_1
                                                                             )
+
+                    if len(CorrInfo) > 0:
+                        for PRN in CorrInfo.keys():
+                            CorrPrevInfo["Sod_Prev"] = CorrInfo[PRN]["Sod"]
+                            CorrPrevInfo["SatComPos_Prev"] = (CorrInfo[PRN]["SatX"], CorrInfo[PRN]["SatY"], CorrInfo[PRN]["SatZ"])
 
                     # If CORR outputs are requested
                     if Conf["CORR_OUT"] == 1:
@@ -300,7 +320,14 @@ for Jd in range(Conf["INI_DATE_JD"], Conf["END_DATE_JD"] + 1):
     # If CORR outputs are requested
     if Conf["CORR_OUT"] == 1:
         # Close CORR output file
-        fcorr.close()
+        # fcorr.close()
+
+        # Display Message
+        print("INFO: Reading file: %s and generating PREPRO figures..." %
+        CorrFile)
+
+        # Generate Preprocessing plots
+        generateCorrPlots(CorrFile)
 
 # End of JD loop
 
